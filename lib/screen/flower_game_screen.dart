@@ -4,42 +4,62 @@ import 'package:flower_bloom/screen/home_screen.dart';
 import 'package:flower_bloom/utilities/audio_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart';
 import '../bloc/game_bloc/game_bloc.dart';
 import '../constants.dart';
 import '../widget/base/base_widget.dart';
 
 class GameScreen extends StatefulWidget {
   final int? level;
-  GameScreen({super.key, this.level});
+  const GameScreen({super.key, this.level});
 
   @override
   State<GameScreen> createState() => _GameScreenState();
 }
 
-class _GameScreenState extends BaseState<GameScreen> with SingleTickerProviderStateMixin {
+class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMixin {
   final audioManager = injector.get<AudioManager>();
   final bloc = injector.get<GameBloc>();
 
-  late AnimationController _controller;
+  late AnimationController _levelCompleteController;
   late Animation<double> _scaleAnimation;
+  
+  // Controller cho animation hoa nở tĩnh
+  late AnimationController _staticFlowerController;
+  
+  // Map để lưu trữ trạng thái animation của từng ô
+  final Map<String, bool> _tileAnimationStates = {};
+  
+  // Biến để kiểm tra xem có animation nào đang chạy không
+  bool _isAnyAnimationRunning = false;
 
   @override
   void initState() {
     super.initState();
 
-    _controller = AnimationController(
+    _levelCompleteController = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 1000),
     );
 
     _scaleAnimation = Tween<double>(begin: 0.5, end: 1.2).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
+      CurvedAnimation(parent: _levelCompleteController, curve: Curves.elasticOut),
     );
+    
+    // Khởi tạo controller cho animation hoa nở tĩnh
+    _staticFlowerController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 1),
+    );
+    
+    // Đặt giá trị cụ thể để hiển thị frame mong muốn (0.8 là ví dụ, có thể điều chỉnh)
+    _staticFlowerController.value = 0.9;
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _levelCompleteController.dispose();
+    _staticFlowerController.dispose();
     super.dispose();
   }
 
@@ -56,15 +76,49 @@ class _GameScreenState extends BaseState<GameScreen> with SingleTickerProviderSt
         child: BlocProvider(
           create: (context) => bloc..add(LoadGame(level: widget.level)),
           child: BlocConsumer<GameBloc, GameState>(
-            // listenWhen: (previous, current) {
-            //   if (previous != current) return true;
-            //   if (previous is GameLoaded && current is GameLoaded && previous.model.level != current.model.level) return true;
-            //   return false;
-            // },
             listener: (context, state) {
               if (state is GameLoaded && state.model.isWin) {
-                _controller.forward();
-                _controller.forward(from: 0.0);
+                _levelCompleteController.forward();
+                _levelCompleteController.forward(from: 0.0);
+              }
+              
+              // Khi ResetGame hoặc NextLevel được gọi, xóa tất cả trạng thái animation
+              if (state is GameLoaded && state.model.lastToggled == null) {
+                _tileAnimationStates.clear();
+                _isAnyAnimationRunning = false;
+              }
+              
+              // Cập nhật trạng thái animation khi có ô được nhấn
+              if (state is GameLoaded && state.model.lastToggled != null) {
+                final lastToggled = state.model.lastToggled!;
+                
+                // Đánh dấu có animation đang chạy
+                _isAnyAnimationRunning = true;
+                
+                // Cập nhật trạng thái animation cho ô được nhấn và các ô xung quanh
+                final positions = [
+                  'tile_${lastToggled.row}${lastToggled.col}',
+                  'tile_${lastToggled.row - 1}${lastToggled.col}',
+                  'tile_${lastToggled.row + 1}${lastToggled.col}',
+                  'tile_${lastToggled.row}${lastToggled.col - 1}',
+                  'tile_${lastToggled.row}${lastToggled.col + 1}',
+                ];
+                
+                for (final tileKey in positions) {
+                  _tileAnimationStates[tileKey] = true;
+                }
+                
+                // Đặt timer để chuyển sang trạng thái hoàn thành sau khi animation kết thúc
+                Future.delayed(Duration(milliseconds: 300), () {
+                  if (mounted) {
+                    setState(() {
+                      for (final tileKey in positions) {
+                        _tileAnimationStates[tileKey] = false;
+                      }
+                      _isAnyAnimationRunning = false;
+                    });
+                  }
+                });
               }
             },
             builder: (context, state) {
@@ -120,7 +174,9 @@ class _GameScreenState extends BaseState<GameScreen> with SingleTickerProviderSt
                                           Navigator.pushReplacement(
                                             context,
                                             MaterialPageRoute(
-                                                builder: (context) => HomeScreen(showMenu: true,)),
+                                                builder: (context) => HomeScreen(
+                                                      showMenu: true,
+                                                    )),
                                           );
                                         },
                                         highlightColor: Colors.transparent,
@@ -235,9 +291,20 @@ class _GameScreenState extends BaseState<GameScreen> with SingleTickerProviderSt
 
   Widget _buildFlowerTile(BuildContext context, GameViewModel model, int row, int col, double tileSize) {
     bool isBlooming = model.grid[row][col];
+    
+    // Tạo key cho ô
+    final tileKey = 'tile_$row$col';
+    
+    // Kiểm tra xem ô này có đang trong trạng thái animation không
+    bool isAnimating = _tileAnimationStates[tileKey] ?? false;
 
     return GestureDetector(
-      onTap: () => bloc.add(ToggleFlower(row, col)),
+      onTap: () {
+        // Chỉ cho phép nhấn khi không có animation nào đang chạy
+        if (!_isAnyAnimationRunning) {
+          bloc.add(ToggleFlower(row, col));
+        }
+      },
       child: AnimatedContainer(
         duration: Duration(milliseconds: 300),
         margin: EdgeInsets.all(2), // Khoảng cách giữa các ô
@@ -245,15 +312,55 @@ class _GameScreenState extends BaseState<GameScreen> with SingleTickerProviderSt
         height: tileSize - 8,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: isBlooming ? Colors.pinkAccent : Colors.grey,
+          color: isBlooming 
+              ? Colors.transparent
+              : Colors.grey,
           border: Border.all(color: Colors.black, width: 2),
         ),
         child: Center(
-          child: Icon(
-            isBlooming ? Icons.local_florist : Icons.grass,
-            color: Colors.white,
-            size: 24,
-          ),
+          child: isAnimating
+              ? isBlooming
+                  // Khi đang animate và là hoa nở, hiển thị animation hoa nở
+                  ? Lottie.asset(
+                      ImagePath.flowerBloom,
+                      key: ValueKey('bloom_$row$col${DateTime.now().millisecondsSinceEpoch}'),
+                      width: tileSize,
+                      height: tileSize,
+                      fit: BoxFit.contain,
+                      repeat: false,
+                      frameRate: FrameRate.max,
+                    )
+                  // Khi đang animate và là lá, hiển thị animation lá
+                  : Lottie.asset(
+                      ImagePath.leaf,
+                      key: ValueKey('leaf_$row$col${DateTime.now().millisecondsSinceEpoch}'),
+                      width: tileSize,
+                      height: tileSize,
+                      fit: BoxFit.contain,
+                      repeat: false,
+                      frameRate: FrameRate.max,
+                    )
+              : isBlooming
+                  // Khi không animate và là hoa nở, hiển thị frame cụ thể của animation hoa nở
+                  ? Lottie.asset(
+                      ImagePath.flowerBloom,
+                      width: tileSize,
+                      height: tileSize,
+                      fit: BoxFit.contain,
+                      controller: _staticFlowerController,
+                      repeat: false,
+                      animate: false,
+                    )
+                  // Khi không animate và là lá, hiển thị animation lá tĩnh
+                  : Lottie.asset(
+                      ImagePath.leaf,
+                      width: tileSize,
+                      height: tileSize,
+                      fit: BoxFit.contain,
+                      repeat: false,
+                      frameRate: FrameRate.max,
+                      animate: false,
+                    ),
         ),
       ),
     );

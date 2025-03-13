@@ -13,9 +13,11 @@ import 'utilities/localization_helper.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-    await SystemChrome.setPreferredOrientations([
+  await SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
+    // DeviceOrientation.portraitUp,
+    // DeviceOrientation.portraitDown,
   ]);
 
   runApp(MyApp(initialLanguage: await UserReference().getLanguage() ?? 'vi'));

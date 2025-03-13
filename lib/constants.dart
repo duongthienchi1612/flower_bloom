@@ -27,6 +27,8 @@ class ImagePath {
   static const icStar2 = 'assets/images/ic_star_2.png';
   static const icStar3 = 'assets/images/ic_star_3.png';
   //lottie
+  static const flowerBloom = 'assets/images/lottie/flower_bloom.json';
+  static const leaf = 'assets/images/lottie/leaf.json';
 }
 
 class SoundEffect {

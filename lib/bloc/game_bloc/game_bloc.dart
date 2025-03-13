@@ -32,7 +32,16 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       level = int.tryParse(firstKeyWithZero) ?? 1;
     }
 
-    final model = GameViewModel(List.generate(level + 2, (_) => List.filled(level + 2, false)), false, level, level + 2,
+    // Tạo lưới ban đầu với tất cả các ô không nở hoa
+    List<List<bool>> initialGrid = List.generate(level + 2, (_) => List.filled(level + 2, false));
+    
+    // Nếu là lưới 5x5 (level 3), đặt ô trung tâm thành trạng thái nở hoa
+    if (level + 2 == 5) {
+      int center = (level + 2) ~/ 2;
+      initialGrid[center][center] = true;
+    }
+
+    final model = GameViewModel(initialGrid, false, level, level + 2,
         audioManager.isSoundOn, 0);
 
     emit(GameLoaded(model));
@@ -57,20 +66,37 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     bool isWin = newGrid.every((row) => row.every((flower) => flower));
 
-    model.grid = newGrid;
-    model.isWin = isWin;
-    model.moveCount += 1;
-    emit(GameLoaded(model));
+    final updatedModel = model.copyWith(
+      grid: newGrid,
+      isWin: isWin,
+      moveCount: model.moveCount + 1,
+      lastToggled: Position(event.row, event.col),
+    );
+    
+    emit(GameLoaded(updatedModel));
   }
 
   void _onResetGame(ResetGame event, Emitter<GameState> emit) {
     final currentState = state as GameLoaded;
     final model = currentState.model;
 
-    model.grid = List.generate(model.level + 2, (_) => List.filled(model.level + 2, false));
-    model.isWin = false;
+    // Tạo lưới ban đầu với tất cả các ô không nở hoa
+    List<List<bool>> initialGrid = List.generate(model.gridSize, (_) => List.filled(model.gridSize, false));
+    
+    // Nếu là lưới 5x5, đặt ô trung tâm thành trạng thái nở hoa
+    if (model.gridSize == 5) {
+      int center = model.gridSize ~/ 2;
+      initialGrid[center][center] = true;
+    }
 
-    emit(GameLoaded(model));
+    final resetModel = model.copyWith(
+      grid: initialGrid,
+      isWin: false,
+      lastToggled: null,
+      moveCount: 0,
+    );
+
+    emit(GameLoaded(resetModel));
   }
 
   void _onNextLevel(NextLevel event, Emitter<GameState> emit) async {
@@ -81,8 +107,24 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       int nextLevel = model.level + 1;
       await gameStorage.saveLevelStars(model.level, 3);
 
-      final nextLevelModel = GameViewModel(List.generate(nextLevel + 2, (_) => List.filled(nextLevel + 2, false)),
-          false, nextLevel, nextLevel + 2, audioManager.isSoundOn, 0);
+      // Tạo lưới ban đầu với tất cả các ô không nở hoa
+      List<List<bool>> initialGrid = List.generate(nextLevel + 2, (_) => List.filled(nextLevel + 2, false));
+      
+      // Nếu là lưới 5x5 (level 3), đặt ô trung tâm thành trạng thái nở hoa
+      if (nextLevel + 2 == 5) {
+        int center = (nextLevel + 2) ~/ 2;
+        initialGrid[center][center] = true;
+      }
+
+      final nextLevelModel = GameViewModel(
+        initialGrid,
+        false, 
+        nextLevel, 
+        nextLevel + 2, 
+        audioManager.isSoundOn, 
+        0,
+        null, // Reset lastToggled
+      );
 
       emit(GameLoaded(nextLevelModel));
     }

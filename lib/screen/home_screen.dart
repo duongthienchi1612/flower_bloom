@@ -3,6 +3,7 @@ import 'package:flower_bloom/constants.dart';
 import 'package:flower_bloom/dependencies.dart';
 import 'package:flower_bloom/screen/menu_level_screen.dart';
 import 'package:flower_bloom/utilities/audio_manager.dart';
+import 'package:flower_bloom/utilities/route_transitions.dart';
 import 'package:flower_bloom/widget/base/base_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -56,8 +57,14 @@ class _HomeScreenState extends BaseState<HomeScreen> {
                               audioManager.playSoundEffect(SoundEffect.buttonClick);
                               Navigator.pushReplacement(
                                 context,
-                                MaterialPageRoute(builder: (context) => GameScreen(level: level)),
+                                AppRouteTransitions.fadeScale(
+                                  page: GameScreen(level: level),
+                                ),
                               );
+                              // Navigator.pushReplacement(
+                              //   context,
+                              //   MaterialPageRoute(builder: (context) => GameScreen(level: level)),
+                              // );
                             },
                           )
                         : Center(
@@ -96,7 +103,9 @@ class _HomeScreenState extends BaseState<HomeScreen> {
                                     audioManager.playSoundEffect(SoundEffect.buttonClick);
                                     Navigator.pushReplacement(
                                       context,
-                                      MaterialPageRoute(builder: (context) => GameScreen()),
+                                      AppRouteTransitions.fadeScale(
+                                        page: GameScreen(),
+                                      ),
                                     );
                                   },
                                   highlightColor: Colors.transparent,

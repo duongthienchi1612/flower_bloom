@@ -47,7 +47,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     emit(GameLoaded(model));
   }
 
-  void _onToggleFlower(ToggleFlower event, Emitter<GameState> emit) {
+  Future<void> _onToggleFlower(ToggleFlower event, Emitter<GameState> emit) async {
     final currentState = state as GameLoaded;
     final model = currentState.model;
     List<List<bool>> newGrid = List.generate(model.gridSize, (i) => List.from(model.grid[i]));

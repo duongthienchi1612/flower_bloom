@@ -26,6 +26,10 @@ class ImagePath {
   static const icStar1 = 'assets/images/ic_star_1.png';
   static const icStar2 = 'assets/images/ic_star_2.png';
   static const icStar3 = 'assets/images/ic_star_3.png';
+  static const imgLoading0 = 'assets/images/img_loading_0.png';
+  static const imgLoading50 = 'assets/images/img_loading_50.png';
+  static const imgLoading100 = 'assets/images/img_loading_100.png';
+
   //lottie
   static const flowerBloom = 'assets/images/lottie/flower_bloom.json';
   static const leaf = 'assets/images/lottie/leaf.json';

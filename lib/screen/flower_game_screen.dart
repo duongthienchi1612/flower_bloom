@@ -9,6 +9,7 @@ import 'package:lottie/lottie.dart';
 import '../bloc/game_bloc/game_bloc.dart';
 import '../constants.dart';
 import '../widget/base/base_widget.dart';
+import '../widget/sound_settings_dialog.dart';
 
 class GameScreen extends StatefulWidget {
   final int? level;
@@ -53,7 +54,7 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
     // Animation level complete
     _levelCompleteController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 1000),
     );
 
     _scaleAnimation = Tween<double>(begin: 0.5, end: 1.2).animate(
@@ -63,7 +64,7 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
     // Khởi tạo controller cho animation hoa nở tĩnh
     _staticFlowerController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 1),
+      duration: const Duration(milliseconds: 1),
     );
 
     // Đặt giá trị cụ thể để hiển thị frame mong muốn
@@ -72,14 +73,14 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
     // Khởi tạo controller cho animation UI
     _uiController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 500),
     );
 
     // Animation cho fade toàn màn hình
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _uiController,
-        curve: Interval(0.0, 0.6, curve: Curves.easeOut),
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
       ),
     );
 
@@ -87,7 +88,7 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
     _scaleUIAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
       CurvedAnimation(
         parent: _uiController,
-        curve: Interval(0.0, 0.6, curve: Curves.easeOutBack),
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOutBack),
       ),
     );
 
@@ -95,7 +96,7 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
     _moveCountAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _uiController,
-        curve: Interval(0.3, 0.7, curve: Curves.easeOutBack),
+        curve: const Interval(0.3, 0.7, curve: Curves.easeOutBack),
       ),
     );
 
@@ -103,7 +104,7 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
     _levelTextAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _uiController,
-        curve: Interval(0.4, 0.8, curve: Curves.easeOutBack),
+        curve: const Interval(0.4, 0.8, curve: Curves.easeOutBack),
       ),
     );
 
@@ -111,7 +112,7 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
     _gridAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _uiController,
-        curve: Interval(0.2, 0.9, curve: Curves.easeOutBack),
+        curve: const Interval(0.2, 0.9, curve: Curves.easeOutBack),
       ),
     );
 
@@ -119,12 +120,13 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
     _buttonsAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _uiController,
-        curve: Interval(0.6, 1.0, curve: Curves.elasticOut),
+        curve: const Interval(0.6, 1.0, curve: Curves.elasticOut),
       ),
     );
 
     // Bắt đầu animation UI
     _uiController.forward();
+    audioManager.playSoundEffect(SoundEffect.gameAppear);
   }
 
   @override
@@ -139,7 +141,7 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage(ImagePath.background),
             fit: BoxFit.cover,
@@ -149,10 +151,6 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
           create: (context) => bloc..add(LoadGame(level: widget.level)),
           child: BlocConsumer<GameBloc, GameState>(
             listener: (context, state) async {
-              // if (state is GameLoaded && state.model.isWin && !_isAnyAnimationRunning) {
-              //   _levelCompleteController.forward();
-              //   _levelCompleteController.forward(from: 0.0);
-              // }
               
               // Khi ResetGame hoặc NextLevel được gọi, xóa tất cả trạng thái animation
               if (state is GameLoaded && state.model.lastToggled == null) {
@@ -183,7 +181,7 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
                 }
 
                 // Đặt timer để chuyển sang trạng thái hoàn thành sau khi animation kết thúc
-                Future.delayed(Duration(milliseconds: 500), () {
+                Future.delayed(const Duration(milliseconds: 500), () {
                   if (mounted) {
                     setState(() {
                       for (final tileKey in positions) {
@@ -194,7 +192,8 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
                       // Kiểm tra trạng thái chiến thắng sau khi animation kết thúc
                       if (isWinState && !_showCompletedScreen) {
                         // Thêm độ trễ trước khi hiển thị màn hình completed
-                        Future.delayed(Duration(milliseconds: 250), () {
+                        Future.delayed(const Duration(milliseconds: 250), () {
+                          audioManager.playSoundEffect(SoundEffect.soundCompleted);
                           if (mounted) {
                             setState(() {
                               _showCompletedScreen = true;
@@ -229,20 +228,20 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
                                         children: [
                                           Text('Level Complete',
                                               style: theme.textTheme.headlineMedium!.copyWith(color: Colors.white)),
-                                          SizedBox(
+                                          const SizedBox(
                                             height: 24,
                                           ),
                                           Row(
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
                                               Image.asset(ImagePath.icStarActive, width: 38),
-                                              SizedBox(width: 8),
+                                              const SizedBox(width: 8),
                                               Image.asset(ImagePath.icStarActive, width: 38),
-                                              SizedBox(width: 8),
+                                              const SizedBox(width: 8),
                                               Image.asset(ImagePath.icStarActive, width: 38)
                                             ],
                                           ),
-                                          SizedBox(height: 24),
+                                          const SizedBox(height: 24),
                                           Row(
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
@@ -265,11 +264,11 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
                                               ),
                                               IconButton(
                                                 onPressed: () {
-                                                  bloc.audioManager.playSoundEffect(SoundEffect.buttonClick);
+                                                  audioManager.playSoundEffect(SoundEffect.buttonClick);
                                                   Navigator.pushReplacement(
                                                     context,
                                                     AppRouteTransitions.fadeScale(
-                                                      page: HomeScreen(
+                                                      page: const HomeScreen(
                                                         showMenu: true,
                                                       ),
                                                     ),
@@ -302,7 +301,7 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
                               top: 16,
                               child: SlideTransition(
                                 position: Tween<Offset>(
-                                  begin: Offset(-0.2, 0),
+                                  begin: const Offset(-0.2, 0),
                                   end: Offset.zero,
                                 ).animate(_moveCountAnimation),
                                 child: FadeTransition(
@@ -328,7 +327,7 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
                               top: 16,
                               child: SlideTransition(
                                 position: Tween<Offset>(
-                                  begin: Offset(0.2, 0),
+                                  begin: const Offset(0.2, 0),
                                   end: Offset.zero,
                                 ).animate(_levelTextAnimation),
                                 child: FadeTransition(
@@ -349,12 +348,20 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
                                 child: FadeTransition(
                                   opacity: _buttonsAnimation,
                                   child: IconButton(
-                                    onPressed: () {
-                                      bloc.add(ChangeSound());
+                                    onPressed: () async {
+                                      audioManager.playSoundEffect(SoundEffect.buttonClick);
+                                      await showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (context) => SoundSettingsDialog(
+                                          backgroundVolume: audioManager.backgroundVolume,
+                                          effectVolume: audioManager.effectVolume,
+                                        ),
+                                      );
                                     },
                                     highlightColor: Colors.transparent,
                                     icon: Image.asset(
-                                      state.model.isSoundOn ? ImagePath.icSoundOn : ImagePath.icSoundOff,
+                                      ImagePath.icSoundOn,
                                       width: 32,
                                     ),
                                   ),
@@ -371,11 +378,11 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
                                   opacity: _buttonsAnimation,
                                   child: IconButton(
                                     onPressed: () {
-                                      bloc.audioManager.playSoundEffect(SoundEffect.buttonClick);
+                                      audioManager.playSoundEffect(SoundEffect.buttonClick);
                                       Navigator.pushReplacement(
                                         context,
                                         AppRouteTransitions.fadeScale(
-                                          page: HomeScreen(),
+                                          page: const HomeScreen(),
                                         ),
                                       );
                                     },
@@ -394,7 +401,7 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
                   },
                 );
               }
-              return SizedBox();
+              return const SizedBox();
             },
           ),
         ),
@@ -446,12 +453,13 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
       onTap: () {
         // Chỉ cho phép nhấn khi không có animation nào đang chạy
         if (!_isAnyAnimationRunning) {
+          audioManager.playSoundEffect(SoundEffect.soundFlowerBloom);
           bloc.add(ToggleFlower(row, col));
         }
       },
       child: AnimatedContainer(
-        duration: Duration(milliseconds: 300),
-        margin: EdgeInsets.all(2), // Khoảng cách giữa các ô
+        duration: const Duration(milliseconds: 300),
+        margin: const EdgeInsets.all(2), // Khoảng cách giữa các ô
         width: tileSize - 8, // Giảm nhẹ kích thước để tránh tràn
         height: tileSize - 8,
         decoration: BoxDecoration(

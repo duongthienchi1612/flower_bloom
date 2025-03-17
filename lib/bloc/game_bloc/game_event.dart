@@ -17,7 +17,3 @@ class LoadGame extends GameEvent {
 }
 
 class NextLevel extends GameEvent {}
-
-class ChangeSound extends GameEvent {
-  ChangeSound();
-}

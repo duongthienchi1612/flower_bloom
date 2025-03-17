@@ -5,7 +5,6 @@ class HomeViewModel {
   int totalStars;
   int currentStars;
 
-  bool isSoundOn;
   bool isDataLevelShow;
 
   HomeViewModel(
@@ -14,7 +13,6 @@ class HomeViewModel {
     this.unlockedLevels,
     this.totalStars,
     this.currentStars,
-    this.isSoundOn,
     this.isDataLevelShow,
   );
 
@@ -33,7 +31,6 @@ class HomeViewModel {
       unlockedLevels ?? this.unlockedLevels,
       totalStars ?? this.totalStars,
       currentStars ?? this.currentStars,
-      isSoundOn ?? this.isSoundOn,
       isDataLevelShow ?? this.isDataLevelShow,
     );
   }

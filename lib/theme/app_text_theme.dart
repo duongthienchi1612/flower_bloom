@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class AppTextTheme {
   AppTextTheme._();
-  static TextTheme textTheme = TextTheme(
+  static TextTheme textTheme = const TextTheme(
     // Game Name
     displayLarge: TextStyle(
       fontSize: 32,
@@ -22,16 +22,16 @@ class AppTextTheme {
       fontFamily: 'Bungee',
       color: AppColors.mainTextColor,
     ),
-    // Văn bản chính
     titleLarge: TextStyle(
-      fontSize: 16,
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w600,
+      fontSize: 18,
+      fontFamily: 'Bungee',
+      color: AppColors.mainTextColor,
     ),
     // Văn bản chính
     bodyLarge: TextStyle(
       fontSize: 16,
-      fontFamily: 'Inter',
+      fontFamily: 'Bungee',
+      color: AppColors.mainTextColor,
     ),
     // Văn bản phụ
     bodyMedium: TextStyle(

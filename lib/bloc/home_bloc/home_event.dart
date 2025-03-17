@@ -8,10 +8,6 @@ class LoadData extends HomeEvent {
   LoadData({this.showMenu});
 }
 
-class ChangeSound extends HomeEvent {
-  ChangeSound();
-}
-
 class ShowDataLevel extends HomeEvent {
   final bool isShow;
   ShowDataLevel({this.isShow = false});

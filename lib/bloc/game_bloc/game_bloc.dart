@@ -17,7 +17,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<ToggleFlower>(_onToggleFlower);
     on<ResetGame>(_onResetGame);
     on<NextLevel>(_onNextLevel);
-    on<ChangeSound>(_onChangeSound);
   }
 
   void _onLoadGame(LoadGame event, Emitter<GameState> emit) async {
@@ -41,8 +40,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       initialGrid[center][center] = true;
     }
 
-    final model = GameViewModel(initialGrid, false, level, level + 2,
-        audioManager.isSoundOn, 0);
+    final model = GameViewModel(initialGrid, false, level, level + 2, 0);
 
     emit(GameLoaded(model));
   }
@@ -121,20 +119,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         false, 
         nextLevel, 
         nextLevel + 2, 
-        audioManager.isSoundOn, 
         0,
         null, // Reset lastToggled
       );
 
       emit(GameLoaded(nextLevelModel));
     }
-  }
-
-  Future<void> _onChangeSound(ChangeSound event, Emitter<GameState> emit) async {
-    final currentState = state as GameLoaded;
-    final model = currentState.model;
-    audioManager.toggleSound();
-    model.isSoundOn = audioManager.isSoundOn;
-    emit(GameLoaded(model));
   }
 }

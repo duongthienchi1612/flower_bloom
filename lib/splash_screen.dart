@@ -46,12 +46,15 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   Future<void> _initializeDependencies() async {
-    await AppDependencies.initialize();
+    // Kiểm tra xem dependencies đã được khởi tạo chưa
+    if (!injector.isRegistered<UserReference>()) {
+      await AppDependencies.initialize();
+    }
 
-    final audioManager = injector.get<AudioManager>();
+    // final audioManager = injector.get<AudioManager>();
     
-    await audioManager.init();
-    await audioManager.playBackgroundMusic();
+    // await audioManager.init();
+    // await audioManager.playBackgroundMusic();
 
     // get reference data;
     final gameStorage = injector.get<GameStorage>();
@@ -86,7 +89,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       children: [
                         // Chữ Loading
                         Text(
-                          'Loading',
+                          'LOADING...',
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         SizedBox(height: 20),

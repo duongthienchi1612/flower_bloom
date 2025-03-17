@@ -40,6 +40,9 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen>
   
   // Danh sách các animation cho từng level
   final List<Animation<double>> _levelAnimations = [];
+  
+  // Danh sách để theo dõi các level đã phát âm thanh
+  final Set<int> _playedSoundForLevels = {};
 
   @override
   void initState() {
@@ -48,14 +51,27 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen>
     // Controller cho animation toàn màn hình
     _screenController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 800),
     );
     
     // Controller cho animation grid các level
     _gridController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1500),
     );
+    
+    // Thêm listener cho _gridController để phát âm thanh khi các level xuất hiện
+    _gridController.addListener(() {
+      for (int i = 0; i < Constants.totalLevel; i++) {
+        // Chỉ phát âm thanh khi animation đạt đến ngưỡng và chưa phát âm thanh cho level này
+        if (_levelAnimations[i].value > 0.1 && !_playedSoundForLevels.contains(i)) {
+          _playedSoundForLevels.add(i);
+          audioManager.playSoundEffect(SoundEffect.levelAppear);
+          // Dừng vòng lặp sau khi phát âm thanh cho một level
+          break; // Chỉ phát một âm thanh mỗi lần để tránh chồng chéo
+        }
+      }
+    });
     
     // Animation cho màn hình
     _screenScaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
@@ -63,12 +79,12 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen>
     );
     
     _screenOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _screenController, curve: Interval(0.0, 0.6, curve: Curves.easeOut)),
+      CurvedAnimation(parent: _screenController, curve: const Interval(0.0, 0.6, curve: Curves.easeOut)),
     );
     
     // Animation cho số sao
     _starsCounterAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _screenController, curve: Interval(0.6, 1.0, curve: Curves.easeOut)),
+      CurvedAnimation(parent: _screenController, curve: const Interval(0.6, 1.0, curve: Curves.easeOut)),
     );
     
     // Tạo animation cho từng level với thời gian delay khác nhau
@@ -76,18 +92,18 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen>
       final startInterval = 0.1 + (i * 0.1);
       final endInterval = startInterval + 0.2;
       
-      _levelAnimations.add(
-        Tween<double>(begin: 0.0, end: 1.0).animate(
-          CurvedAnimation(
-            parent: _gridController,
-            curve: Interval(
-              startInterval.clamp(0.0, 1.0), 
-              endInterval.clamp(0.0, 1.0),
-              curve: Curves.easeOutBack,
-            ),
+      final animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(
+          parent: _gridController,
+          curve: Interval(
+            startInterval.clamp(0.0, 1.0), 
+            endInterval.clamp(0.0, 1.0),
+            curve: Curves.easeOutBack,
           ),
         ),
       );
+      
+      _levelAnimations.add(animation);
     }
     
     // Bắt đầu các animation
@@ -99,6 +115,7 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen>
   void dispose() {
     _screenController.dispose();
     _gridController.dispose();
+    _playedSoundForLevels.clear();
     super.dispose();
   }
 
@@ -115,7 +132,7 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen>
               children: [
                 Center(
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 200, vertical: 100),
+                    padding: const EdgeInsets.symmetric(horizontal: 200, vertical: 100),
                     child: GridView.builder(
                       itemCount: Constants.totalLevel,
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -137,7 +154,7 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen>
                               opacity: _levelAnimations[index].value.clamp(0.0, 1.0),
                               child: isLocked
                                 ? Transform.translate(
-                                    offset: Offset(0, 10),
+                                    offset: const Offset(0, 10),
                                     child: Image.asset(ImagePath.icLevelLock),
                                   )
                                 : GestureDetector(
@@ -146,11 +163,11 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen>
                                       alignment: Alignment.center,
                                       children: [
                                         Transform.translate(
-                                          offset: Offset(0, 10),
+                                          offset: const Offset(0, 10),
                                           child: Image.asset(ImagePath.icLevelNumber),
                                         ),
                                         Transform.translate(
-                                          offset: Offset(0, 31),
+                                          offset: const Offset(0, 31),
                                           child: Image.asset(
                                             'assets/images/ic_star_$star.png',
                                             width: 44,
@@ -178,7 +195,7 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen>
                     opacity: _starsCounterAnimation,
                     child: SlideTransition(
                       position: Tween<Offset>(
-                        begin: Offset(-0.2, 0),
+                        begin: const Offset(-0.2, 0),
                         end: Offset.zero,
                       ).animate(_starsCounterAnimation),
                       child: Row(
@@ -187,7 +204,7 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen>
                             ImagePath.icStarActive,
                             width: 32,
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Text(
                             '${widget.model.currentStars} / ${widget.model.totalStars}',
                             style: theme.textTheme.headlineMedium,
@@ -209,7 +226,7 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen>
                         onPressed: () => widget.onChangeSound(),
                         highlightColor: Colors.transparent,
                         icon: Image.asset(
-                          widget.model.isSoundOn ? ImagePath.icSoundOn : ImagePath.icSoundOff,
+                          ImagePath.icSoundOn,
                           width: 32,
                         ),
                       ),

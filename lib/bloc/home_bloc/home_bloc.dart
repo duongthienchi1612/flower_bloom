@@ -17,25 +17,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   HomeBloc() : super(HomeInitial()) {
     on<LoadData>(_onLoadData);
-    on<ChangeSound>(_onChangeSound);
     on<ShowDataLevel>(_onShowDataLevel);
   }
 
   Future<void> _onLoadData(LoadData event, Emitter<HomeState> emit) async {
-    final model = HomeViewModel(totalLevel, {}, {}, 0, 0, audioManager.isSoundOn, false);
+    final model = HomeViewModel(totalLevel, {}, {}, 0, 0, false);
     emit(HomeLoaded(model));
     if (event.showMenu == true) {
       add(ShowDataLevel(isShow: true));
       return;
     }
-  }
-
-  Future<void> _onChangeSound(ChangeSound event, Emitter<HomeState> emit) async {
-    final currentState = state as HomeLoaded;
-    final model = currentState.model;
-    audioManager.toggleSound();
-    model.isSoundOn = audioManager.isSoundOn;
-    emit(HomeLoaded(model));
   }
 
   Future<void> _onShowDataLevel(ShowDataLevel event, Emitter<HomeState> emit) async {

@@ -1,15 +1,16 @@
 import 'package:flower_bloom/bloc/home_bloc/home_bloc.dart';
 import 'package:flower_bloom/constants.dart';
 import 'package:flower_bloom/dependencies.dart';
+import 'package:flower_bloom/model/view/home_view_model.dart';
+import 'package:flower_bloom/screen/flower_game_screen.dart';
 import 'package:flower_bloom/screen/menu_level_screen.dart';
-import 'package:flower_bloom/utilities/audio_manager.dart';
-import 'package:flower_bloom/utilities/route_transitions.dart';
 import 'package:flower_bloom/widget/base/base_widget.dart';
+import 'package:flower_bloom/widget/sound_settings_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import '../utilities/route_transitions.dart';
 
-import 'flower_game_screen.dart';
 import '../utilities/audio_manager.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -35,7 +36,7 @@ class _HomeScreenState extends BaseState<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage(ImagePath.background),
             fit: BoxFit.cover,
@@ -61,10 +62,7 @@ class _HomeScreenState extends BaseState<HomeScreen> {
                                   page: GameScreen(level: level),
                                 ),
                               );
-                              // Navigator.pushReplacement(
-                              //   context,
-                              //   MaterialPageRoute(builder: (context) => GameScreen(level: level)),
-                              // );
+      
                             },
                           )
                         : Center(
@@ -122,12 +120,20 @@ class _HomeScreenState extends BaseState<HomeScreen> {
                       left: 24,
                       bottom: 16,
                       child: IconButton(
-                        onPressed: () {
-                          bloc.add(ChangeSound());
+                        onPressed: () async {
+                          audioManager.playSoundEffect(SoundEffect.buttonClick);
+                          await showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => SoundSettingsDialog(
+                              backgroundVolume: audioManager.backgroundVolume,
+                              effectVolume: audioManager.effectVolume,
+                            ),
+                          );
                         },
                         highlightColor: Colors.transparent,
                         icon: Image.asset(
-                          state.model.isSoundOn ? ImagePath.icSoundOn : ImagePath.icSoundOff,
+                          ImagePath.icSoundOn,
                           width: 32,
                         ),
                       ),
@@ -149,7 +155,7 @@ class _HomeScreenState extends BaseState<HomeScreen> {
                   ],
                 );
               }
-              return SizedBox();
+              return const SizedBox();
             },
           ),
         ),

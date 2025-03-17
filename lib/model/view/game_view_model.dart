@@ -3,18 +3,16 @@ class GameViewModel {
   bool isWin;
   int level;
   int gridSize;
-  bool isSoundOn;
   int moveCount;
   Position? lastToggled;
 
-  GameViewModel(this.grid, this.isWin, this.level, this.gridSize, this.isSoundOn, this.moveCount, [this.lastToggled]);
+  GameViewModel(this.grid, this.isWin, this.level, this.gridSize, this.moveCount, [this.lastToggled]);
 
   GameViewModel copyWith({
     List<List<bool>>? grid,
     bool? isWin,
     int? level,
     int? gridSize,
-    bool? isSoundOn,
     int? moveCount,
     Position? lastToggled,
   }) {
@@ -23,7 +21,6 @@ class GameViewModel {
       isWin ?? this.isWin,
       level ?? this.level,
       gridSize ?? this.gridSize,
-      isSoundOn ?? this.isSoundOn,
       moveCount ?? this.moveCount,
       lastToggled ?? this.lastToggled,
     );

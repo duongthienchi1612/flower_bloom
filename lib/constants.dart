@@ -29,6 +29,7 @@ class ImagePath {
   static const imgLoading0 = 'assets/images/img_loading_0.png';
   static const imgLoading50 = 'assets/images/img_loading_50.png';
   static const imgLoading100 = 'assets/images/img_loading_100.png';
+  static const icBtnTheme = 'assets/images/ic_btn_theme.png';
 
   //lottie
   static const flowerBloom = 'assets/images/lottie/flower_bloom.json';
@@ -37,8 +38,14 @@ class ImagePath {
 
 class SoundEffect {
   SoundEffect._();
-  static const background = 'sounds/background_music.mp3';
-  static const buttonClick = 'sounds/click.mp3';
+  static const background = 'assets/sounds/background_music.mp3';
+  static const buttonClick = 'assets/sounds/click.mp3';
+  static const soundCompleted = 'assets/sounds/completed.mp3';
+  static const soundFlowerBloom = 'assets/sounds/flower_bloom.mp3';
+  static const gameAppear = 'assets/sounds/game_appear.mp3';
+  static const levelAppear = 'assets/sounds/level_appear.mp3';
+  static const levelComplete = 'assets/sounds/level_complete.mp3';
+  static const levelFail = 'assets/sounds/level_fail.mp3';
 }
 
 class ScreenName {
@@ -49,4 +56,8 @@ class ScreenName {
 class Constants {
   Constants._();
   static const totalLevel = 5;
+}
+
+class BackgroundMusic {
+  static const String main = 'assets/sounds/background_music.mp3';
 }

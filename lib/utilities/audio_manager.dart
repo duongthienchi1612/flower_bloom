@@ -1,42 +1,65 @@
-import 'package:audioplayers/audioplayers.dart';
-import 'package:flower_bloom/constants.dart';
+import 'package:just_audio/just_audio.dart';
+import '../constants.dart';
 
 class AudioManager {
-  // Player cho nhạc nền
-  late AudioPlayer _bgmPlayer;
+  final AudioPlayer _backgroundPlayer = AudioPlayer();
+  final AudioPlayer _effectPlayer = AudioPlayer();
+  bool _isSoundOn = true;
+  bool _isSoundOnBackground = true;
+  double _backgroundVolume = 0.3;
+  double _effectVolume = 1.0;
 
-  // Trạng thái bật/tắt âm thanh
-  bool isSoundOn = true;
-
-  Future<void> init() async {
-    _bgmPlayer = AudioPlayer();
-    await _bgmPlayer.setReleaseMode(ReleaseMode.loop);
+  AudioManager() {
+    _init();
   }
 
-  Future<void> playBackgroundMusic() async {
-    if (isSoundOn) {
-      await _bgmPlayer.play(AssetSource(SoundEffect.background));
+  void _init() {
+    _backgroundPlayer.setAsset(BackgroundMusic.main);
+    _backgroundPlayer.setLoopMode(LoopMode.one);
+    _backgroundPlayer.setVolume(_backgroundVolume);
+    _effectPlayer.setVolume(_effectVolume);
+    
+    playBackgroundMusic();
+  }
+
+  void playBackgroundMusic() {
+    if (_isSoundOnBackground) {
+      _backgroundPlayer.play();
     }
   }
 
-  Future<void> stopBackgroundMusic() async {
-    await _bgmPlayer.stop();
+  void pauseBackgroundMusic() {
+    _backgroundPlayer.pause();
   }
 
-  Future<void> toggleSound() async {
-    isSoundOn = !isSoundOn;
-    if (isSoundOn) {
-      await playBackgroundMusic();
-    } else {
-      await stopBackgroundMusic();
+  void stopBackgroundMusic() {
+    _backgroundPlayer.stop();
+  }
+
+  void playSoundEffect(String assetPath) {
+    if (_isSoundOn) {
+      _effectPlayer.setAsset(assetPath);
+      _effectPlayer.play();
     }
   }
 
-  Future<void> playSoundEffect(String assetPath) async {
-    if (isSoundOn) {
-      final player = AudioPlayer();
-      await player.play(AssetSource(assetPath));
-    }
+  bool get isSoundOn => _isSoundOn;
+
+  void setBackgroundVolume(double volume) {
+    _backgroundVolume = volume;
+    _backgroundPlayer.setVolume(volume);
   }
 
+  void setEffectVolume(double volume) async {
+    _effectVolume = volume;
+    await _effectPlayer.setVolume(volume);
+  }
+
+  double get backgroundVolume => _backgroundVolume;
+  double get effectVolume => _effectVolume;
+
+  void dispose() {
+    _backgroundPlayer.dispose();
+    _effectPlayer.dispose();
+  }
 }

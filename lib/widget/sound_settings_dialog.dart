@@ -4,6 +4,7 @@ import '../constants.dart';
 import '../utilities/audio_manager.dart';
 import '../dependencies.dart';
 import '../widget/base/base_widget.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SoundSettingsDialog extends StatefulWidget {
   final double backgroundVolume;
@@ -32,37 +33,41 @@ class _SoundSettingsDialogState extends BaseState<SoundSettingsDialog> {
   }
 
   void _handleBackgroundMusicIconTap() {
+    // Lưu giá trị hiện tại
+    final newVolume = _backgroundVolume > 0 ? 0.0 : 1.0;
+
+    // Cập nhật UI
     setState(() {
-      if (_backgroundVolume > 0) {
-        // Nếu đang có âm nhạc, tắt đi
-        _backgroundVolume = 0;
-        audioManager.setBackgroundVolume(0);
-        audioManager.pauseBackgroundMusic();
-      } else {
-        // Nếu đang tắt, bật lại 100%
-        _backgroundVolume = 1.0;
-        audioManager.setBackgroundVolume(1.0);
-        audioManager.playBackgroundMusic();
-      }
+      _backgroundVolume = newVolume;
     });
+
+    // Thực hiện các thao tác không liên quan đến UI sau khi setState
+    if (newVolume > 0) {
+      audioManager.setBackgroundVolume(newVolume);
+      audioManager.playBackgroundMusic();
+    } else {
+      audioManager.setBackgroundVolume(newVolume);
+      audioManager.pauseBackgroundMusic();
+    }
   }
 
   void _handleSoundIconTap() {
+    // Lưu giá trị hiện tại
+    final newVolume = _effectVolume > 0 ? 0.0 : 1.0;
+
+    // Cập nhật UI
     setState(() {
-      if (_effectVolume > 0) {
-        // Nếu đang có âm thanh, tắt đi
-        _effectVolume = 0;
-        audioManager.setEffectVolume(0);
-      } else {
-        // Nếu đang tắt, bật lại 100%
-        _effectVolume = 1.0;
-        audioManager.setEffectVolume(1.0);
-      }
+      _effectVolume = newVolume;
     });
+
+    // Thực hiện các thao tác không liên quan đến UI sau khi setState
+    audioManager.setEffectVolume(newVolume);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Dialog(
       backgroundColor: Colors.transparent,
       child: SingleChildScrollView(
@@ -82,7 +87,7 @@ class _SoundSettingsDialogState extends BaseState<SoundSettingsDialog> {
               const SizedBox(height: 8),
               // Tiêu đề
               Text(
-                'Cài đặt âm thanh',
+                l10n.soundSettings,
                 style: theme.textTheme.headlineMedium?.copyWith(color: Colors.white),
               ),
               const SizedBox(height: 18),
@@ -91,7 +96,7 @@ class _SoundSettingsDialogState extends BaseState<SoundSettingsDialog> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Âm nhạc nền',
+                  l10n.backgroundMusic,
                   style: theme.textTheme.bodyLarge,
                 ),
               ),
@@ -135,7 +140,7 @@ class _SoundSettingsDialogState extends BaseState<SoundSettingsDialog> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Âm thanh hiệu ứng',
+                  l10n.soundEffects,
                   style: theme.textTheme.bodyLarge,
                 ),
               ),
@@ -185,32 +190,13 @@ class _SoundSettingsDialogState extends BaseState<SoundSettingsDialog> {
                     Transform.translate(
                       offset: const Offset(0, -2),
                       child: Text(
-                        'Đóng',
+                        l10n.close,
                         style: theme.textTheme.bodyLarge?.copyWith(color: AppColors.iconTextColor),
                       ),
                     ),
                   ],
                 ),
               ),
-              // ElevatedButton(
-              //   onPressed: () {
-              //     audioManager.playSoundEffect(SoundEffect.buttonClick);
-              //     Navigator.of(context).pop();
-              //   },
-              //   style: ElevatedButton.styleFrom(
-              //     backgroundColor: Theme.of(context).primaryColor,
-              //     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
-              //     shape: RoundedRectangleBorder(
-              //       borderRadius: BorderRadius.circular(8),
-              //     ),
-              //   ),
-              //   child: Text(
-              //     'Đóng',
-              //     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              //       color: Colors.white,
-              //     ),
-              //   ),
-              // ),
             ],
           ),
         ),

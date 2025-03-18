@@ -43,7 +43,7 @@ dependencies:
   lottie: ^2.7.0
   just_audio: ^0.9.36
   basic_utils: ^5.7.0
-  shared_preferences: ^2.3.5
+  shared_preferences: ^2.5.2
   flutter_svg: ^2.0.17
   audioplayers: ^6.2.0
   equatable: ^2.0.7
@@ -85,7 +85,6 @@ flutter:
     - assets/sounds/
     - assets/images/
     - assets/images/lottie/
-    - assets/animations/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

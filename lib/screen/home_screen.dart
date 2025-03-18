@@ -1,14 +1,14 @@
 import 'package:flower_bloom/bloc/home_bloc/home_bloc.dart';
 import 'package:flower_bloom/constants.dart';
 import 'package:flower_bloom/dependencies.dart';
-import 'package:flower_bloom/model/view/home_view_model.dart';
 import 'package:flower_bloom/screen/flower_game_screen.dart';
 import 'package:flower_bloom/screen/menu_level_screen.dart';
 import 'package:flower_bloom/widget/base/base_widget.dart';
 import 'package:flower_bloom/widget/sound_settings_dialog.dart';
+import 'package:flower_bloom/widget/language_settings_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
+import '../theme/app_colors.dart';
 import '../utilities/route_transitions.dart';
 
 import '../utilities/audio_manager.dart';
@@ -62,7 +62,6 @@ class _HomeScreenState extends BaseState<HomeScreen> {
                                   page: GameScreen(level: level),
                                 ),
                               );
-      
                             },
                           )
                         : Center(
@@ -74,12 +73,12 @@ class _HomeScreenState extends BaseState<HomeScreen> {
                                   width: 140,
                                 ),
                                 Transform.translate(
-                                  offset: Offset(0, -70),
+                                  offset: const Offset(0, -70),
                                   child: Stack(
                                     alignment: Alignment.center,
                                     children: [
                                       Transform.translate(
-                                        offset: Offset(0, 8),
+                                        offset: const Offset(0, 8),
                                         child: Image.asset(
                                           ImagePath.back,
                                           width: 300,
@@ -102,7 +101,7 @@ class _HomeScreenState extends BaseState<HomeScreen> {
                                     Navigator.pushReplacement(
                                       context,
                                       AppRouteTransitions.fadeScale(
-                                        page: GameScreen(),
+                                        page: const GameScreen(),
                                       ),
                                     );
                                   },
@@ -117,26 +116,14 @@ class _HomeScreenState extends BaseState<HomeScreen> {
                             ),
                           ),
                     Positioned(
+                      right: 24,
+                      top: 16,
+                      child: _buildLanguageButton(),
+                    ),
+                    Positioned(
                       left: 24,
                       bottom: 16,
-                      child: IconButton(
-                        onPressed: () async {
-                          audioManager.playSoundEffect(SoundEffect.buttonClick);
-                          await showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (context) => SoundSettingsDialog(
-                              backgroundVolume: audioManager.backgroundVolume,
-                              effectVolume: audioManager.effectVolume,
-                            ),
-                          );
-                        },
-                        highlightColor: Colors.transparent,
-                        icon: Image.asset(
-                          ImagePath.icSoundOn,
-                          width: 32,
-                        ),
-                      ),
+                      child: _buildSoundButton(),
                     ),
                     Positioned(
                       right: 24,
@@ -159,6 +146,51 @@ class _HomeScreenState extends BaseState<HomeScreen> {
             },
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageButton() {
+    return IconButton(
+      onPressed: () async {
+        audioManager.playSoundEffect(SoundEffect.buttonClick);
+        final currentLanguageCode = Localizations.localeOf(context).languageCode;
+        final newLanguageCode = await showDialog<String>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => LanguageSettingsDialog(
+            currentLanguageCode: currentLanguageCode,
+          ),
+        );
+
+        if (newLanguageCode != null && widget.changeLanguage != null) {
+          widget.changeLanguage!(newLanguageCode);
+        }
+      },
+      icon: const Icon(
+        Icons.settings,
+        color: AppColors.mainTextColor,
+        size: 28,
+      ),
+    );
+  }
+
+  Widget _buildSoundButton() {
+    return IconButton(
+      onPressed: () async {
+        audioManager.playSoundEffect(SoundEffect.buttonClick);
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => SoundSettingsDialog(
+            backgroundVolume: audioManager.backgroundVolume,
+            effectVolume: audioManager.effectVolume,
+          ),
+        );
+      },
+      icon: Image.asset(
+        ImagePath.icSoundOn,
+        width: 32,
       ),
     );
   }

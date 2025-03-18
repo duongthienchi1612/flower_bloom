@@ -56,6 +56,7 @@ class ScreenName {
 class Constants {
   Constants._();
   static const totalLevel = 5;
+  static const tiledSize = 66.0;
 }
 
 class BackgroundMusic {

@@ -1,10 +1,9 @@
 import 'package:flower_bloom/dependencies.dart';
 import 'package:flower_bloom/model/view/game_view_model.dart';
-import 'package:flower_bloom/screen/home_screen.dart';
 import 'package:flower_bloom/utilities/audio_manager.dart';
-import 'package:flower_bloom/utilities/route_transitions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lottie/lottie.dart';
 import '../bloc/game_bloc/game_bloc.dart';
 import '../constants.dart';
@@ -23,13 +22,10 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
   final audioManager = injector.get<AudioManager>();
   final bloc = injector.get<GameBloc>();
 
+  // Controller và animation
   late AnimationController _levelCompleteController;
   late Animation<double> _scaleAnimation;
-
-  // Controller cho animation hoa nở tĩnh
   late AnimationController _staticFlowerController;
-
-  // Controllers cho animation UI
   late AnimationController _uiController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleUIAnimation;
@@ -38,95 +34,58 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
   late Animation<double> _gridAnimation;
   late Animation<double> _buttonsAnimation;
 
-  // Map để lưu trữ trạng thái animation của từng ô
+  // Quản lý trạng thái
   final Map<String, bool> _tileAnimationStates = {};
-
-  // Biến để kiểm tra xem có animation nào đang chạy không
   bool _isAnyAnimationRunning = false;
-  
-  // Biến để kiểm soát việc hiển thị màn hình completed
   bool _showCompletedScreen = false;
 
   @override
   void initState() {
     super.initState();
+    _initializeAnimations();
+    audioManager.playSoundEffect(SoundEffect.gameAppear);
+  }
 
-    // Animation level complete
+  void _initializeAnimations() {
+    // Level complete animation
     _levelCompleteController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
-
     _scaleAnimation = Tween<double>(begin: 0.5, end: 1.2).animate(
       CurvedAnimation(parent: _levelCompleteController, curve: Curves.elasticOut),
     );
 
-    // Khởi tạo controller cho animation hoa nở tĩnh
+    // Static flower controller
     _staticFlowerController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1),
-    );
+    )..value = 0.9;
 
-    // Đặt giá trị cụ thể để hiển thị frame mong muốn
-    _staticFlowerController.value = 0.9;
-
-    // Khởi tạo controller cho animation UI
+    // UI animations
     _uiController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
 
-    // Animation cho fade toàn màn hình
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _uiController,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-      ),
-    );
+    _fadeAnimation = _createAnimation(0.0, 0.6, Curves.easeOut);
+    _scaleUIAnimation = _createAnimation(0.0, 0.6, Curves.easeOutBack, begin: 0.95, end: 1.0);
+    _moveCountAnimation = _createAnimation(0.3, 0.7, Curves.easeOutBack);
+    _levelTextAnimation = _createAnimation(0.4, 0.8, Curves.easeOutBack);
+    _gridAnimation = _createAnimation(0.2, 0.9, Curves.easeOutBack);
+    _buttonsAnimation = _createAnimation(0.6, 1.0, Curves.elasticOut);
 
-    // Animation cho scale toàn màn hình
-    _scaleUIAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _uiController,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeOutBack),
-      ),
-    );
-
-    // Animation cho số lượt nhấn
-    _moveCountAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _uiController,
-        curve: const Interval(0.3, 0.7, curve: Curves.easeOutBack),
-      ),
-    );
-
-    // Animation cho text level
-    _levelTextAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _uiController,
-        curve: const Interval(0.4, 0.8, curve: Curves.easeOutBack),
-      ),
-    );
-
-    // Animation cho grid
-    _gridAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _uiController,
-        curve: const Interval(0.2, 0.9, curve: Curves.easeOutBack),
-      ),
-    );
-
-    // Animation cho các nút
-    _buttonsAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _uiController,
-        curve: const Interval(0.6, 1.0, curve: Curves.elasticOut),
-      ),
-    );
-
-    // Bắt đầu animation UI
     _uiController.forward();
-    audioManager.playSoundEffect(SoundEffect.gameAppear);
+  }
+
+  Animation<double> _createAnimation(double beginInterval, double endInterval, Curve curve,
+      {double? begin, double? end}) {
+    return Tween<double>(begin: begin ?? 0.0, end: end ?? 1.0).animate(
+      CurvedAnimation(
+        parent: _uiController,
+        curve: Interval(beginInterval, endInterval, curve: curve),
+      ),
+    );
   }
 
   @override
@@ -150,256 +109,10 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
         child: BlocProvider(
           create: (context) => bloc..add(LoadGame(level: widget.level)),
           child: BlocConsumer<GameBloc, GameState>(
-            listener: (context, state) async {
-              
-              // Khi ResetGame hoặc NextLevel được gọi, xóa tất cả trạng thái animation
-              if (state is GameLoaded && state.model.lastToggled == null) {
-                _tileAnimationStates.clear();
-                _isAnyAnimationRunning = false;
-                _showCompletedScreen = false;
-              }
-
-              // Cập nhật trạng thái animation khi có ô được nhấn
-              if (state is GameLoaded && state.model.lastToggled != null) {
-                final lastToggled = state.model.lastToggled!;
-                final isWinState = state.model.isWin;
-
-                // Đánh dấu có animation đang chạy
-                _isAnyAnimationRunning = true;
-
-                // Cập nhật trạng thái animation cho ô được nhấn và các ô xung quanh
-                final positions = [
-                  'tile_${lastToggled.row}${lastToggled.col}',
-                  'tile_${lastToggled.row - 1}${lastToggled.col}',
-                  'tile_${lastToggled.row + 1}${lastToggled.col}',
-                  'tile_${lastToggled.row}${lastToggled.col - 1}',
-                  'tile_${lastToggled.row}${lastToggled.col + 1}',
-                ];
-
-                for (final tileKey in positions) {
-                  _tileAnimationStates[tileKey] = true;
-                }
-
-                // Đặt timer để chuyển sang trạng thái hoàn thành sau khi animation kết thúc
-                Future.delayed(const Duration(milliseconds: 500), () {
-                  if (mounted) {
-                    setState(() {
-                      for (final tileKey in positions) {
-                        _tileAnimationStates[tileKey] = false;
-                      }
-                      _isAnyAnimationRunning = false;
-                      
-                      // Kiểm tra trạng thái chiến thắng sau khi animation kết thúc
-                      if (isWinState && !_showCompletedScreen) {
-                        // Thêm độ trễ trước khi hiển thị màn hình completed
-                        Future.delayed(const Duration(milliseconds: 250), () {
-                          audioManager.playSoundEffect(SoundEffect.soundCompleted);
-                          if (mounted) {
-                            setState(() {
-                              _showCompletedScreen = true;
-                              _levelCompleteController.forward(from: 0.0);
-                            });
-                          }
-                        });
-                      }
-                    });
-                  }
-                });
-              }
-            },
+            listener: _onGameStateChanged,
             builder: (context, state) {
               if (state is GameLoaded) {
-                final model = state.model;
-                return AnimatedBuilder(
-                  animation: _uiController,
-                  builder: (context, child) {
-                    return FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: ScaleTransition(
-                        scale: _scaleUIAnimation,
-                        child: Stack(
-                          children: [
-                            _showCompletedScreen && model.level < Constants.totalLevel
-                                ? Center(
-                                    child: ScaleTransition(
-                                      scale: _scaleAnimation,
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text('Level Complete',
-                                              style: theme.textTheme.headlineMedium!.copyWith(color: Colors.white)),
-                                          const SizedBox(
-                                            height: 24,
-                                          ),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Image.asset(ImagePath.icStarActive, width: 38),
-                                              const SizedBox(width: 8),
-                                              Image.asset(ImagePath.icStarActive, width: 38),
-                                              const SizedBox(width: 8),
-                                              Image.asset(ImagePath.icStarActive, width: 38)
-                                            ],
-                                          ),
-                                          const SizedBox(height: 24),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              IconButton(
-                                                onPressed: () {
-                                                  audioManager.playSoundEffect(SoundEffect.buttonClick);
-                                                  _showCompletedScreen = false;
-                                                  bloc.add(ResetGame());
-                                                },
-                                                highlightColor: Colors.transparent,
-                                                icon: Image.asset(ImagePath.icReload, width: 38),
-                                              ),
-                                              IconButton(
-                                                onPressed: () {
-                                                  audioManager.playSoundEffect(SoundEffect.buttonClick);
-                                                  bloc.add(NextLevel());
-                                                },
-                                                highlightColor: Colors.transparent,
-                                                icon: Image.asset(ImagePath.icPlay, width: 38),
-                                              ),
-                                              IconButton(
-                                                onPressed: () {
-                                                  audioManager.playSoundEffect(SoundEffect.buttonClick);
-                                                  Navigator.pushReplacement(
-                                                    context,
-                                                    AppRouteTransitions.fadeScale(
-                                                      page: const HomeScreen(
-                                                        showMenu: true,
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                                highlightColor: Colors.transparent,
-                                                icon: Image.asset(ImagePath.icMenuLevel, width: 38),
-                                              )
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  )
-                                : Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      ScaleTransition(
-                                        scale: _gridAnimation,
-                                        child: FadeTransition(
-                                          opacity: _gridAnimation,
-                                          child: _buildGrid(context, model),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                            // Số lượt nhấn
-                            Positioned(
-                              left: 24,
-                              top: 16,
-                              child: SlideTransition(
-                                position: Tween<Offset>(
-                                  begin: const Offset(-0.2, 0),
-                                  end: Offset.zero,
-                                ).animate(_moveCountAnimation),
-                                child: FadeTransition(
-                                  opacity: _moveCountAnimation,
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        'Lượt nhấn: ',
-                                        style: theme.textTheme.headlineSmall,
-                                      ),
-                                      Text(
-                                        model.moveCount.toString(),
-                                        style: theme.textTheme.headlineSmall,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            // Text level
-                            Positioned(
-                              right: 24,
-                              top: 16,
-                              child: SlideTransition(
-                                position: Tween<Offset>(
-                                  begin: const Offset(0.2, 0),
-                                  end: Offset.zero,
-                                ).animate(_levelTextAnimation),
-                                child: FadeTransition(
-                                  opacity: _levelTextAnimation,
-                                  child: Text(
-                                    'Level: ${model.level}',
-                                    style: theme.textTheme.headlineSmall,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            // Nút âm thanh
-                            Positioned(
-                              left: 24,
-                              bottom: 16,
-                              child: ScaleTransition(
-                                scale: _buttonsAnimation,
-                                child: FadeTransition(
-                                  opacity: _buttonsAnimation,
-                                  child: IconButton(
-                                    onPressed: () async {
-                                      audioManager.playSoundEffect(SoundEffect.buttonClick);
-                                      await showDialog(
-                                        context: context,
-                                        barrierDismissible: false,
-                                        builder: (context) => SoundSettingsDialog(
-                                          backgroundVolume: audioManager.backgroundVolume,
-                                          effectVolume: audioManager.effectVolume,
-                                        ),
-                                      );
-                                    },
-                                    highlightColor: Colors.transparent,
-                                    icon: Image.asset(
-                                      ImagePath.icSoundOn,
-                                      width: 32,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            // Nút home
-                            Positioned(
-                              right: 24,
-                              bottom: 16,
-                              child: ScaleTransition(
-                                scale: _buttonsAnimation,
-                                child: FadeTransition(
-                                  opacity: _buttonsAnimation,
-                                  child: IconButton(
-                                    onPressed: () {
-                                      audioManager.playSoundEffect(SoundEffect.buttonClick);
-                                      Navigator.pushReplacement(
-                                        context,
-                                        AppRouteTransitions.fadeScale(
-                                          page: const HomeScreen(),
-                                        ),
-                                      );
-                                    },
-                                    icon: Image.asset(
-                                      ImagePath.icHome,
-                                      width: 32,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
+                return _buildGameContent(state.model);
               }
               return const SizedBox();
             },
@@ -409,30 +122,139 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
     );
   }
 
-  Widget _buildGrid(BuildContext context, GameViewModel model) {
-    final size = MediaQuery.of(context).size;
-    double maxWidth = size.width * 0.85; // Chừa 10% viền ngoài
-    double maxHeight = size.height * 0.85;
-    double gridSize = model.gridSize.toDouble();
+  void _onGameStateChanged(BuildContext context, GameState state) async {
+    if (state is GameLoaded && state.model.lastToggled == null) {
+      _tileAnimationStates.clear();
+      _isAnyAnimationRunning = false;
+      _showCompletedScreen = false;
+    }
 
-    // Chọn cạnh nhỏ hơn của màn hình để làm kích thước tối đa của lưới
-    double maxGridSize = maxWidth < maxHeight ? maxWidth : maxHeight;
-    double tileSize = maxGridSize / gridSize;
+    if (state is GameLoaded && state.model.lastToggled != null) {
+      final lastToggled = state.model.lastToggled!;
+      final isWinState = state.model.isWin;
 
-    return Center(
-      child: SizedBox(
-        width: maxGridSize,
-        height: maxGridSize,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(
-            model.gridSize,
-            (row) => Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                model.gridSize,
-                (col) => _buildFlowerTile(context, model, row, col, tileSize),
-              ),
+      _isAnyAnimationRunning = true;
+
+      // Cập nhật trạng thái animation
+      final positions = [
+        'tile_${lastToggled.row}${lastToggled.col}',
+        'tile_${lastToggled.row - 1}${lastToggled.col}',
+        'tile_${lastToggled.row + 1}${lastToggled.col}',
+        'tile_${lastToggled.row}${lastToggled.col - 1}',
+        'tile_${lastToggled.row}${lastToggled.col + 1}',
+      ];
+
+      for (final tileKey in positions) {
+        _tileAnimationStates[tileKey] = true;
+      }
+
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          setState(() {
+            for (final tileKey in positions) {
+              _tileAnimationStates[tileKey] = false;
+            }
+            _isAnyAnimationRunning = false;
+
+            if (isWinState && !_showCompletedScreen) {
+              Future.delayed(const Duration(milliseconds: 250), () {
+                audioManager.playSoundEffect(SoundEffect.soundCompleted);
+                if (mounted) {
+                  setState(() {
+                    _showCompletedScreen = true;
+                    _levelCompleteController.forward(from: 0.0);
+                  });
+                }
+              });
+            }
+          });
+        }
+      });
+    }
+  }
+
+  Widget _buildGameContent(GameViewModel model) {
+    return AnimatedBuilder(
+      animation: _uiController,
+      builder: (context, child) {
+        return FadeTransition(
+          opacity: _fadeAnimation,
+          child: ScaleTransition(
+            scale: _scaleUIAnimation,
+            child: Stack(
+              children: [
+                // Game info
+                _buildGameInfo(model),
+                // Bottom controls
+                _buildBottomControls(),
+                // Game content
+                _showCompletedScreen && model.level < Constants.totalLevel
+                    ? _buildLevelCompleteScreen(model)
+                    : _buildGameGrid(model),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildGameInfo(GameViewModel model) {
+    return Stack(
+      children: [
+        // Moves counter
+        Positioned(
+          left: 24,
+          top: 16,
+          child: _buildInfoText(
+            text: '${localizations.moves}: ${model.moveCount}',
+            animation: _moveCountAnimation,
+            offset: const Offset(-0.2, 0),
+          ),
+        ),
+
+        // Level indicator
+        Positioned(
+          right: 24,
+          top: 16,
+          child: _buildInfoText(
+            text: '${localizations.level}: ${model.level}',
+            animation: _levelTextAnimation,
+            offset: const Offset(0.2, 0),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoText({
+    required String text,
+    required Animation<double> animation,
+    required Offset offset,
+  }) {
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: offset,
+        end: Offset.zero,
+      ).animate(animation),
+      child: FadeTransition(
+        opacity: animation,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            text,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              shadows: [
+                Shadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 3,
+                  offset: const Offset(1, 1),
+                ),
+              ],
             ),
           ),
         ),
@@ -440,18 +262,251 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
     );
   }
 
-  Widget _buildFlowerTile(BuildContext context, GameViewModel model, int row, int col, double tileSize) {
-    bool isBlooming = model.grid[row][col];
+  Widget _buildBottomControls() {
+    return Stack(
+      children: [
+        // Sound button
+        Positioned(
+          left: 24,
+          bottom: 16,
+          child: _buildAnimatedButton(
+            animation: _buttonsAnimation,
+            icon: ImagePath.icSoundOn,
+            onPressed: () async {
+              audioManager.playSoundEffect(SoundEffect.buttonClick);
+              await showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => SoundSettingsDialog(
+                  backgroundVolume: audioManager.backgroundVolume,
+                  effectVolume: audioManager.effectVolume,
+                ),
+              );
+            },
+          ),
+        ),
 
-    // Tạo key cho ô
-    final tileKey = 'tile_$row$col';
+        // Home button
+        Positioned(
+          right: 24,
+          bottom: 16,
+          child: _buildAnimatedButton(
+            animation: _buttonsAnimation,
+            icon: ImagePath.icHome,
+            onPressed: () {
+              audioManager.playSoundEffect(SoundEffect.buttonClick);
+              Navigator.pushReplacementNamed(context, ScreenName.home);
+            },
+          ),
+        ),
+      ],
+    );
+  }
 
-    // Kiểm tra xem ô này có đang trong trạng thái animation không
-    bool isAnimating = _tileAnimationStates[tileKey] ?? false;
+  Widget _buildAnimatedButton({
+    required Animation<double> animation,
+    required String icon,
+    required VoidCallback onPressed,
+  }) {
+    return ScaleTransition(
+      scale: animation,
+      child: FadeTransition(
+        opacity: animation,
+        child: IconButton(
+          onPressed: onPressed,
+          highlightColor: Colors.transparent,
+          icon: Image.asset(icon, width: 32),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGameGrid(GameViewModel model) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ScaleTransition(
+            scale: _gridAnimation,
+            child: FadeTransition(
+              opacity: _gridAnimation,
+              child: _buildGrid(context, model),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLevelCompleteScreen(GameViewModel model) {
+    return Center(
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.45),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Title
+              Text(
+                localizations.levelComplete,
+                style: theme.textTheme.headlineMedium!.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 28),
+
+              // Stars
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildStar(model.moveCount),
+                  const SizedBox(width: 12),
+                  _buildStar(model.moveCount),
+                  const SizedBox(width: 12),
+                  _buildStar(model.moveCount),
+                ],
+              ),
+              const SizedBox(height: 22),
+
+              // Move count
+              Text(
+                '${localizations.moves}: ${model.moveCount}',
+                style: theme.textTheme.titleLarge!.copyWith(color: Colors.white),
+              ),
+              const SizedBox(height: 22),
+
+              // Control buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildCompletionButton(
+                    icon: ImagePath.icReload,
+                    onPressed: () {
+                      audioManager.playSoundEffect(SoundEffect.buttonClick);
+                      _showCompletedScreen = false;
+                      bloc.add(ResetGame());
+                    },
+                  ),
+                  const SizedBox(width: 20),
+                  _buildCompletionButton(
+                    icon: ImagePath.icPlay,
+                    onPressed: () {
+                      audioManager.playSoundEffect(SoundEffect.buttonClick);
+                      bloc.add(NextLevel());
+                    },
+                  ),
+                  const SizedBox(width: 20),
+                  _buildCompletionButton(
+                    icon: ImagePath.icMenuLevel,
+                    onPressed: () {
+                      audioManager.playSoundEffect(SoundEffect.buttonClick);
+                      Navigator.pushReplacementNamed(
+                        context,
+                        ScreenName.home,
+                        arguments: true,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStar(int moveCount) {
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(milliseconds: 800),
+      tween: Tween<double>(begin: 0.0, end: 1.0),
+      curve: Curves.elasticOut,
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: value,
+          child: Image.asset(
+            ImagePath.icStarActive,
+            width: 38,
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCompletionButton({
+    required String icon,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: IconButton(
+        onPressed: onPressed,
+        highlightColor: Colors.transparent,
+        icon: Image.asset(icon, width: 38),
+      ),
+    );
+  }
+
+  Widget _buildGrid(BuildContext context, GameViewModel model) {
+    final size = MediaQuery.of(context).size;
+    final double maxWidth = size.width * 0.85;
+    final double maxHeight = size.height * 0.85;
+    final double gridSize = model.gridSize.toDouble();
+
+    final double maxGridSize = maxWidth < maxHeight ? maxWidth : maxHeight;
+    final double tileSize =
+        (maxGridSize / gridSize > Constants.tiledSize) ? Constants.tiledSize : maxGridSize / gridSize;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 10,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(
+          model.gridSize,
+          (row) => Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              model.gridSize,
+              (col) => _buildFlowerTile(model, row, col, tileSize),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFlowerTile(GameViewModel model, int row, int col, double tileSize) {
+    final bool isBlooming = model.grid[row][col];
+    final String tileKey = 'tile_$row$col';
+    final bool isAnimating = _tileAnimationStates[tileKey] ?? false;
 
     return GestureDetector(
       onTap: () {
-        // Chỉ cho phép nhấn khi không có animation nào đang chạy
         if (!_isAnyAnimationRunning) {
           audioManager.playSoundEffect(SoundEffect.soundFlowerBloom);
           bloc.add(ToggleFlower(row, col));
@@ -459,60 +514,73 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        margin: const EdgeInsets.all(2), // Khoảng cách giữa các ô
-        width: tileSize - 8, // Giảm nhẹ kích thước để tránh tràn
+        margin: const EdgeInsets.all(2),
+        width: tileSize - 8,
         height: tileSize - 8,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: isBlooming ? Colors.transparent : Colors.grey,
-          border: Border.all(color: Colors.black, width: 2),
+          color: isBlooming ? Colors.transparent : Colors.grey.withOpacity(0.5),
+          border: Border.all(
+            color: isBlooming ? Colors.green.withOpacity(0.8) : Colors.black.withOpacity(0.6),
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isBlooming ? Colors.green.withOpacity(0.3) : Colors.black.withOpacity(0.1),
+              blurRadius: 6,
+              spreadRadius: 1,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        child: Center(
-          child: isAnimating
-              ? isBlooming
-                  // Khi đang animate và là hoa nở, hiển thị animation hoa nở
-                  ? Lottie.asset(
-                      ImagePath.flowerBloom,
-                      key: ValueKey('bloom_$row$col${DateTime.now().millisecondsSinceEpoch}'),
-                      width: tileSize,
-                      height: tileSize,
-                      fit: BoxFit.contain,
-                      repeat: false,
-                      frameRate: FrameRate.max,
-                    )
-                  // Khi đang animate và là lá, hiển thị animation lá
-                  : Lottie.asset(
-                      ImagePath.leaf,
-                      key: ValueKey('leaf_$row$col${DateTime.now().millisecondsSinceEpoch}'),
-                      width: tileSize,
-                      height: tileSize,
-                      fit: BoxFit.contain,
-                      repeat: false,
-                      frameRate: FrameRate.max,
-                    )
-              : isBlooming
-                  // Khi không animate và là hoa nở, hiển thị frame cụ thể của animation hoa nở
-                  ? Lottie.asset(
-                      ImagePath.flowerBloom,
-                      width: tileSize,
-                      height: tileSize,
-                      fit: BoxFit.contain,
-                      controller: _staticFlowerController,
-                      repeat: false,
-                      animate: false,
-                    )
-                  // Khi không animate và là lá, hiển thị animation lá tĩnh
-                  : Lottie.asset(
-                      ImagePath.leaf,
-                      width: tileSize,
-                      height: tileSize,
-                      fit: BoxFit.contain,
-                      repeat: false,
-                      frameRate: FrameRate.max,
-                      animate: false,
-                    ),
-        ),
+        child: _buildTileContent(isAnimating, isBlooming, row, col, tileSize),
       ),
+    );
+  }
+
+  Widget _buildTileContent(bool isAnimating, bool isBlooming, int row, int col, double tileSize) {
+    if (isAnimating) {
+      // Animating state
+      return isBlooming
+          ? _buildLottieAnimation(
+              ImagePath.flowerBloom,
+              'bloom_$row$col${DateTime.now().millisecondsSinceEpoch}',
+              tileSize,
+            )
+          : _buildLottieAnimation(
+              ImagePath.leaf,
+              'leaf_$row$col${DateTime.now().millisecondsSinceEpoch}',
+              tileSize,
+            );
+    } else {
+      // Static state
+      return isBlooming
+          ? _buildStaticLottie(ImagePath.flowerBloom, tileSize, _staticFlowerController)
+          : _buildStaticLottie(ImagePath.leaf, tileSize, null);
+    }
+  }
+
+  Widget _buildLottieAnimation(String asset, String key, double tileSize) {
+    return Lottie.asset(
+      asset,
+      key: ValueKey(key),
+      width: tileSize,
+      height: tileSize,
+      fit: BoxFit.contain,
+      repeat: false,
+      frameRate: FrameRate.max,
+    );
+  }
+
+  Widget _buildStaticLottie(String asset, double tileSize, AnimationController? controller) {
+    return Lottie.asset(
+      asset,
+      width: tileSize,
+      height: tileSize,
+      fit: BoxFit.contain,
+      controller: controller,
+      repeat: false,
+      animate: false,
     );
   }
 }

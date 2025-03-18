@@ -1,8 +1,5 @@
-import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants.dart';
-import '../utilities/static_var.dart';
 
 class UserReference {
   // get
@@ -33,5 +30,4 @@ class UserReference {
     }
     return null;
   }
-
 }

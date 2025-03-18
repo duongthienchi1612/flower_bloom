@@ -33,7 +33,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     // Tạo lưới ban đầu với tất cả các ô không nở hoa
     List<List<bool>> initialGrid = List.generate(level + 2, (_) => List.filled(level + 2, false));
-    
+
     // Nếu là lưới 5x5 (level 3), đặt ô trung tâm thành trạng thái nở hoa
     if (level + 2 == 5) {
       int center = (level + 2) ~/ 2;
@@ -70,7 +70,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       moveCount: model.moveCount + 1,
       lastToggled: Position(event.row, event.col),
     );
-    
+
     emit(GameLoaded(updatedModel));
   }
 
@@ -80,7 +80,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     // Tạo lưới ban đầu với tất cả các ô không nở hoa
     List<List<bool>> initialGrid = List.generate(model.gridSize, (_) => List.filled(model.gridSize, false));
-    
+
     // Nếu là lưới 5x5, đặt ô trung tâm thành trạng thái nở hoa
     if (model.gridSize == 5) {
       int center = model.gridSize ~/ 2;
@@ -107,7 +107,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       // Tạo lưới ban đầu với tất cả các ô không nở hoa
       List<List<bool>> initialGrid = List.generate(nextLevel + 2, (_) => List.filled(nextLevel + 2, false));
-      
+
       // Nếu là lưới 5x5 (level 3), đặt ô trung tâm thành trạng thái nở hoa
       if (nextLevel + 2 == 5) {
         int center = (nextLevel + 2) ~/ 2;
@@ -116,9 +116,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       final nextLevelModel = GameViewModel(
         initialGrid,
-        false, 
-        nextLevel, 
-        nextLevel + 2, 
+        false,
+        nextLevel,
+        nextLevel + 2,
         0,
         null, // Reset lastToggled
       );

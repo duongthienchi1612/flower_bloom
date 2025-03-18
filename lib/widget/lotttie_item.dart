@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import '../constants.dart';
 
 class LottieItem extends StatefulWidget {
   final String animation;
@@ -52,10 +51,9 @@ class _LottieItemState extends State<LottieItem> with SingleTickerProviderStateM
   @override
   void didUpdateWidget(LottieItem oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     // Nếu trạng thái isBloom thay đổi hoặc shouldAnimate thay đổi, reset animation
-    if (oldWidget.isBloom != widget.isBloom || 
-        (!oldWidget.shouldAnimate && widget.shouldAnimate)) {
+    if (oldWidget.isBloom != widget.isBloom || (!oldWidget.shouldAnimate && widget.shouldAnimate)) {
       _isAnimationComplete = false;
       _controller.reset();
       _controller.forward();
@@ -72,7 +70,7 @@ class _LottieItemState extends State<LottieItem> with SingleTickerProviderStateM
         color: Colors.transparent,
       );
     }
-    
+
     // Trong các trường hợp khác, sử dụng controller để quản lý animation
     return Lottie.asset(
       widget.animation,

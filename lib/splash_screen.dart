@@ -1,13 +1,8 @@
-import 'package:flower_bloom/screen/home_screen.dart';
-import 'package:flower_bloom/utilities/audio_manager.dart';
-import 'package:flower_bloom/utilities/route_transitions.dart';
 import 'package:flutter/material.dart';
 import 'constants.dart';
 import 'dependencies.dart';
 import 'preference/user_reference.dart';
-import 'package:lottie/lottie.dart';
 
-import 'utilities/audio_manager.dart';
 import 'utilities/game_storage.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -20,25 +15,25 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
   late AnimationController _loadingController;
   late Animation<double> _loadingAnimation;
-  
+
   @override
   void initState() {
     super.initState();
-    
+
     // Khởi tạo animation controller cho thanh loading
     _loadingController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
-    
+
     _loadingAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _loadingController, curve: Curves.easeInOut),
     );
-    
+
     // Bắt đầu animation loading
     _loadingController.forward();
   }
-  
+
   @override
   void dispose() {
     _loadingController.dispose();
@@ -52,7 +47,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     }
 
     // final audioManager = injector.get<AudioManager>();
-    
+
     // await audioManager.init();
     // await audioManager.playBackgroundMusic();
 
@@ -76,7 +71,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Scaffold(
               body: Container(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage(ImagePath.background),
                     fit: BoxFit.cover,
@@ -92,7 +87,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           'LOADING...',
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         // Thanh loading
                         AnimatedBuilder(
                           animation: _loadingAnimation,
@@ -101,7 +96,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                             double opacity0 = 0.0;
                             double opacity50 = 0.0;
                             double opacity100 = 0.0;
-                            
+
                             if (_loadingAnimation.value < 0.35) {
                               opacity0 = 1.0;
                             } else if (_loadingAnimation.value < 0.75) {
@@ -109,7 +104,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                             } else {
                               opacity100 = 1.0;
                             }
-                            
+
                             return SizedBox(
                               width: 200,
                               height: 30,
@@ -152,13 +147,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             );
           } else {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              Navigator.pushReplacement(
-                context, 
-                AppRouteTransitions.fadeScale(
-                  page: HomeScreen(),
-                  duration: Duration(milliseconds: 800),
-                ),
-              );
+              Navigator.pushReplacementNamed(context, ScreenName.home);
             });
             return Container();
           }

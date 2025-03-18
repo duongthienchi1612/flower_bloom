@@ -4,8 +4,8 @@ import '../constants.dart';
 class AudioManager {
   final AudioPlayer _backgroundPlayer = AudioPlayer();
   final AudioPlayer _effectPlayer = AudioPlayer();
-  bool _isSoundOn = true;
-  bool _isSoundOnBackground = true;
+  final bool _isSoundOn = true;
+  final bool _isSoundOnBackground = true;
   double _backgroundVolume = 0.3;
   double _effectVolume = 1.0;
 
@@ -18,7 +18,7 @@ class AudioManager {
     _backgroundPlayer.setLoopMode(LoopMode.one);
     _backgroundPlayer.setVolume(_backgroundVolume);
     _effectPlayer.setVolume(_effectVolume);
-    
+
     playBackgroundMusic();
   }
 

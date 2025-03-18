@@ -1,7 +1,5 @@
-import 'package:flower_bloom/bloc/home_bloc/home_bloc.dart';
 import 'package:flower_bloom/model/view/home_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:math' as math;
 
 import '../constants.dart';
@@ -27,39 +25,38 @@ class MenuLevelScreen extends StatefulWidget {
   State<MenuLevelScreen> createState() => _MenuLevelScreenState();
 }
 
-class _MenuLevelScreenState extends BaseState<MenuLevelScreen> 
-    with TickerProviderStateMixin {
+class _MenuLevelScreenState extends BaseState<MenuLevelScreen> with TickerProviderStateMixin {
   final audioManager = injector.get<AudioManager>();
-  
+
   // Controllers cho các animation
   late AnimationController _screenController;
   late AnimationController _gridController;
   late Animation<double> _screenScaleAnimation;
   late Animation<double> _screenOpacityAnimation;
   late Animation<double> _starsCounterAnimation;
-  
+
   // Danh sách các animation cho từng level
   final List<Animation<double>> _levelAnimations = [];
-  
+
   // Danh sách để theo dõi các level đã phát âm thanh
   final Set<int> _playedSoundForLevels = {};
 
   @override
   void initState() {
     super.initState();
-    
+
     // Controller cho animation toàn màn hình
     _screenController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
-    
+
     // Controller cho animation grid các level
     _gridController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
-    
+
     // Thêm listener cho _gridController để phát âm thanh khi các level xuất hiện
     _gridController.addListener(() {
       for (int i = 0; i < Constants.totalLevel; i++) {
@@ -72,40 +69,40 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen>
         }
       }
     });
-    
+
     // Animation cho màn hình
     _screenScaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(parent: _screenController, curve: Curves.easeOutBack),
     );
-    
+
     _screenOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _screenController, curve: const Interval(0.0, 0.6, curve: Curves.easeOut)),
     );
-    
+
     // Animation cho số sao
     _starsCounterAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _screenController, curve: const Interval(0.6, 1.0, curve: Curves.easeOut)),
     );
-    
+
     // Tạo animation cho từng level với thời gian delay khác nhau
     for (int i = 0; i < Constants.totalLevel; i++) {
       final startInterval = 0.1 + (i * 0.1);
       final endInterval = startInterval + 0.2;
-      
+
       final animation = Tween<double>(begin: 0.0, end: 1.0).animate(
         CurvedAnimation(
           parent: _gridController,
           curve: Interval(
-            startInterval.clamp(0.0, 1.0), 
+            startInterval.clamp(0.0, 1.0),
             endInterval.clamp(0.0, 1.0),
             curve: Curves.easeOutBack,
           ),
         ),
       );
-      
+
       _levelAnimations.add(animation);
     }
-    
+
     // Bắt đầu các animation
     _screenController.forward();
     _gridController.forward();
@@ -144,7 +141,7 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen>
                         int level = index + 1;
                         bool isLocked = !widget.model.unlockedLevels.contains(level);
                         int star = widget.model.levelStars.values.elementAt(index);
-                        
+
                         // Áp dụng animation cho từng level
                         return Transform.scale(
                           scale: _levelAnimations[index].value.clamp(0.0, 1.0),
@@ -153,33 +150,33 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen>
                             child: Opacity(
                               opacity: _levelAnimations[index].value.clamp(0.0, 1.0),
                               child: isLocked
-                                ? Transform.translate(
-                                    offset: const Offset(0, 10),
-                                    child: Image.asset(ImagePath.icLevelLock),
-                                  )
-                                : GestureDetector(
-                                  onTap: () => widget.onSelectLevel(level),
-                                  child: Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        Transform.translate(
-                                          offset: const Offset(0, 10),
-                                          child: Image.asset(ImagePath.icLevelNumber),
-                                        ),
-                                        Transform.translate(
-                                          offset: const Offset(0, 31),
-                                          child: Image.asset(
-                                            'assets/images/ic_star_$star.png',
-                                            width: 44,
+                                  ? Transform.translate(
+                                      offset: const Offset(0, 10),
+                                      child: Image.asset(ImagePath.icLevelLock),
+                                    )
+                                  : GestureDetector(
+                                      onTap: () => widget.onSelectLevel(level),
+                                      child: Stack(
+                                        alignment: Alignment.center,
+                                        children: [
+                                          Transform.translate(
+                                            offset: const Offset(0, 10),
+                                            child: Image.asset(ImagePath.icLevelNumber),
                                           ),
-                                        ),
-                                        Text(
-                                          (index + 1).toString(),
-                                          style: theme.textTheme.headlineMedium,
-                                        )
-                                      ],
+                                          Transform.translate(
+                                            offset: const Offset(0, 31),
+                                            child: Image.asset(
+                                              'assets/images/ic_star_$star.png',
+                                              width: 44,
+                                            ),
+                                          ),
+                                          Text(
+                                            (index + 1).toString(),
+                                            style: theme.textTheme.headlineMedium,
+                                          )
+                                        ],
+                                      ),
                                     ),
-                                ),
                             ),
                           ),
                         );

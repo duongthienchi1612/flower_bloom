@@ -188,7 +188,7 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
                 // Bottom controls
                 _buildBottomControls(),
                 // Game content
-                _showCompletedScreen && model.level < Constants.totalLevel
+                _showCompletedScreen && model.level <= Constants.totalLevel
                     ? _buildLevelCompleteScreen(model)
                     : _buildGameGrid(model),
               ],
@@ -392,14 +392,16 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
                       bloc.add(ResetGame());
                     },
                   ),
-                  const SizedBox(width: 20),
-                  _buildCompletionButton(
-                    icon: ImagePath.icPlay,
-                    onPressed: () {
-                      audioManager.playSoundEffect(SoundEffect.buttonClick);
-                      bloc.add(NextLevel());
-                    },
-                  ),
+                  if (model.level < Constants.totalLevel) ...[
+                    const SizedBox(width: 20),
+                    _buildCompletionButton(
+                      icon: ImagePath.icPlay,
+                      onPressed: () {
+                        audioManager.playSoundEffect(SoundEffect.buttonClick);
+                        bloc.add(NextLevel());
+                      },
+                    )
+                  ],
                   const SizedBox(width: 20),
                   _buildCompletionButton(
                     icon: ImagePath.icMenuLevel,
@@ -471,19 +473,9 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
     final double tileSize =
         (maxGridSize / gridSize > Constants.tiledSize) ? Constants.tiledSize : maxGridSize / gridSize;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 10,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(12),
+    return SizedBox(
+      width: maxGridSize,
+      height: maxGridSize,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(

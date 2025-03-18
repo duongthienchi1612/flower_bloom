@@ -34,12 +34,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     // Tạo lưới ban đầu với tất cả các ô không nở hoa
     List<List<bool>> initialGrid = List.generate(level + 2, (_) => List.filled(level + 2, false));
 
-    // Nếu là lưới 5x5 (level 3), đặt ô trung tâm thành trạng thái nở hoa
-    if (level + 2 == 5) {
-      int center = (level + 2) ~/ 2;
-      initialGrid[center][center] = true;
-    }
-
     final model = GameViewModel(initialGrid, false, level, level + 2, 0);
 
     emit(GameLoaded(model));
@@ -63,6 +57,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     toggle(event.row, event.col + 1);
 
     bool isWin = newGrid.every((row) => row.every((flower) => flower));
+
+    if (isWin) {
+      await gameStorage.saveLevelStars(model.level, 3);
+    }
 
     final updatedModel = model.copyWith(
       grid: newGrid,
@@ -103,7 +101,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     if (model.level < 5) {
       int nextLevel = model.level + 1;
-      await gameStorage.saveLevelStars(model.level, 3);
 
       // Tạo lưới ban đầu với tất cả các ô không nở hoa
       List<List<bool>> initialGrid = List.generate(nextLevel + 2, (_) => List.filled(nextLevel + 2, false));

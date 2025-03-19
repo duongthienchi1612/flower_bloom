@@ -2,6 +2,7 @@ class PreferenceKey {
   PreferenceKey._();
   static const language = 'LANGUAGE';
   static const levelData = 'LEVEL_DATA';
+  static const isFirstTime = 'IS_FIRST_TIME';
 }
 
 class ImagePath {
@@ -34,6 +35,8 @@ class ImagePath {
   //lottie
   static const flowerBloom = 'assets/images/lottie/flower_bloom.json';
   static const leaf = 'assets/images/lottie/leaf.json';
+
+  static const icHelp = 'assets/images/ic_help.png';
 }
 
 class SoundEffect {

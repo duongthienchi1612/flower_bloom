@@ -8,18 +8,20 @@ import 'package:flower_bloom/widget/sound_settings_dialog.dart';
 import 'package:flower_bloom/widget/language_settings_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../preference/user_reference.dart';
 import '../theme/app_colors.dart';
 import '../utilities/route_transitions.dart';
 import '../utilities/audio_manager.dart';
+import '../widget/tutorial_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
-  final Function(String)? changeLanguage;
-  final bool? showMenu;
+  final Function(String) changeLanguage;
+  final bool showMenu;
 
   const HomeScreen({
     super.key,
-    this.changeLanguage,
-    this.showMenu,
+    required this.changeLanguage,
+    this.showMenu = false,
   });
 
   @override
@@ -29,6 +31,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends BaseState<HomeScreen> with SingleTickerProviderStateMixin {
   final _audioManager = injector.get<AudioManager>();
   final _bloc = injector.get<HomeBloc>();
+  bool _isFirstTime = true;
 
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
@@ -41,6 +44,22 @@ class _HomeScreenState extends BaseState<HomeScreen> with SingleTickerProviderSt
     super.initState();
     _initializeAnimations();
     _bloc.add(LoadData(showMenu: widget.showMenu));
+    _checkFirstTime();
+  }
+
+  Future<void> _checkFirstTime() async {
+    final userReference = injector.get<UserReference>();
+    final isFirstTime = await userReference.getIsFirstTime();
+    if (isFirstTime == null || isFirstTime == true) {
+      await userReference.setIsFirstTime(false);
+      setState(() {
+        _isFirstTime = true;
+      });
+    } else {
+      setState(() {
+        _isFirstTime = false;
+      });
+    }
   }
 
   void _initializeAnimations() {
@@ -84,6 +103,14 @@ class _HomeScreenState extends BaseState<HomeScreen> with SingleTickerProviderSt
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void _showTutorial() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const TutorialDialog(),
+    );
   }
 
   @override
@@ -192,6 +219,23 @@ class _HomeScreenState extends BaseState<HomeScreen> with SingleTickerProviderSt
             child: _buildGameTitle(),
           ),
           _buildPlayButton(),
+          Transform.translate(
+            offset: const Offset(0, 35),
+            child: GestureDetector(
+              onTap: _showTutorial,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.help,
+                  color: AppColors.iconIconColor,
+                  size: 20,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -288,12 +332,22 @@ class _HomeScreenState extends BaseState<HomeScreen> with SingleTickerProviderSt
 
   void _navigateToGame({int? level}) {
     _audioManager.playSoundEffect(SoundEffect.buttonClick);
+    
     Navigator.pushReplacement(
       context,
       AppRouteTransitions.fadeScale(
-        page: GameScreen(level: level),
+        page: GameScreen(
+          level: level, 
+          shouldShowTutorial: _isFirstTime,
+        ),
       ),
     );
+    
+    if (_isFirstTime) {
+      setState(() {
+        _isFirstTime = false;
+      });
+    }
   }
 
   Future<void> _showLanguageDialog() async {
@@ -307,8 +361,8 @@ class _HomeScreenState extends BaseState<HomeScreen> with SingleTickerProviderSt
       ),
     );
 
-    if (newLanguageCode != null && widget.changeLanguage != null) {
-      widget.changeLanguage!(newLanguageCode);
+    if (newLanguageCode != null) {
+      widget.changeLanguage(newLanguageCode);
     }
   }
 

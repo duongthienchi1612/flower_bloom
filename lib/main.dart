@@ -94,7 +94,7 @@ class _MyAppState extends State<MyApp> {
           return AppRouteTransitions.fadeScale(
             page: HomeScreen(
               changeLanguage: _changeLanguage,
-              showMenu: showMenu,
+              showMenu: showMenu ?? false,
             ),
             duration: const Duration(milliseconds: 600),
           );

@@ -12,10 +12,6 @@ class AppDependencies {
     injector.registerLazySingleton<GameStorage>(() => GameStorage());
     injector.registerLazySingleton<AudioManager>(() => AudioManager());
 
-    // ModelDependencies.init(injector);
-    // RepositoryDependencies.init(injector);
-    // BusinessDependencies.init(injector);
     BlocDependencies.init(injector);
-
   }
 }

@@ -48,7 +48,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
       currentStars += stars;
     }
-    await gameStorage.saveLevelStars(4, 3);
 
     model.levelStars = newLevelStars;
     model.unlockedLevels = newUnlockedLevels;

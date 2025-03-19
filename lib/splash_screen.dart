@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'constants.dart';
 import 'dependencies.dart';
 import 'preference/user_reference.dart';
@@ -15,8 +16,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
   late AnimationController _loadingController;
   late Animation<double> _loadingAnimation;
-  bool _isLoading = true;
-  bool _startFadeOut = false;
+  final bool _startFadeOut = false;
 
   @override
   void initState() {
@@ -45,7 +45,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     // Đảm bảo setState chỉ được gọi sau khi build hoàn tất
     if (mounted) {
       setState(() {
-        _isLoading = false;
       });
       
       // Chuyển trang ngay lập tức mà không cần fade out
@@ -68,6 +67,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     // get reference data;
     final gameStorage = injector.get<GameStorage>();
     gameStorage.initGameData(Constants.totalLevel);
+
+    final userReference = injector.get<UserReference>();
+    final isFirstTime = await userReference.getIsFirstTime();
+    if (isFirstTime == null) {
+      await userReference.setIsFirstTime(true);
+    }
   }
 
   Future<void> timeSplashScreen() async {

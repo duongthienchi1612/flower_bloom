@@ -13,5 +13,15 @@
   "vietnamese": "Vietnamese",
   "cancel": "Cancel",
   "apply": "Apply",
-  "home": "Home"
+  "home": "Home",
+  "tutorialTitle": "How to Play Flower Bloom",
+  "tutorialStep1Title": "1. Select any cell on the grid to start.",
+  "tutorialStep1Desc": "Each cell contains a blooming flower.",
+  "tutorialStep2Title": "2. When you select a cell, surrounding cells change state.",
+  "tutorialStep2Desc": "Bloomed cells will wither, unbloomed cells will bloom.",
+  "tutorialStep3Title": "3. The goal is to make all flowers bloom simultaneously.",
+  "tutorialStep3Desc": "You need to find the right sequence of cells to select.",
+  "tutorialStep4Title": "4. Fewer moves means more stars.",
+  "tutorialStep4Desc": "Try to complete each level with minimum moves!",
+  "gotIt": "Got it!"
 }

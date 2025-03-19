@@ -13,5 +13,15 @@
   "vietnamese": "Tiếng Việt",
   "cancel": "Hủy",
   "apply": "Áp dụng",
-  "home": "Trang chủ"
+  "home": "Trang chủ",
+  "tutorialTitle": "Cách chơi Flower Bloom",
+  "tutorialStep1Title": "1. Chọn một ô bất kỳ trên lưới để bắt đầu.",
+  "tutorialStep1Desc": "Mỗi ô sẽ chứa một bông hoa đang nở.",
+  "tutorialStep2Title": "2. Khi bạn chọn một ô, các ô xung quanh sẽ thay đổi trạng thái.",
+  "tutorialStep2Desc": "Ô đã nở sẽ tàn, ô chưa nở sẽ nở.",
+  "tutorialStep3Title": "3. Mục tiêu là làm cho tất cả các bông hoa nở cùng lúc.",
+  "tutorialStep3Desc": "Bạn cần tìm ra thứ tự chọn các ô phù hợp.",
+  "tutorialStep4Title": "4. Số lượt di chuyển càng ít, số sao nhận được càng cao.",
+  "tutorialStep4Desc": "Cố gắng hoàn thành mỗi màn với số lượt tối thiểu!",
+  "gotIt": "Đã hiểu!"
 }

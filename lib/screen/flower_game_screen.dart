@@ -7,12 +7,20 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lottie/lottie.dart';
 import '../bloc/game_bloc/game_bloc.dart';
 import '../constants.dart';
+import '../preference/user_reference.dart';
 import '../widget/base/base_widget.dart';
 import '../widget/sound_settings_dialog.dart';
+import '../widget/tutorial_dialog.dart';
 
 class GameScreen extends StatefulWidget {
   final int? level;
-  const GameScreen({super.key, this.level});
+  final bool shouldShowTutorial;
+  
+  const GameScreen({
+    super.key, 
+    this.level,
+    this.shouldShowTutorial = false,
+  });
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -21,6 +29,7 @@ class GameScreen extends StatefulWidget {
 class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMixin {
   final audioManager = injector.get<AudioManager>();
   final bloc = injector.get<GameBloc>();
+  final _userReference = injector.get<UserReference>();
 
   // Controller và animation
   late AnimationController _levelCompleteController;
@@ -44,6 +53,23 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
     super.initState();
     _initializeAnimations();
     audioManager.playSoundEffect(SoundEffect.gameAppear);
+    
+    // Hiển thị tutorial nếu cần
+    if (widget.shouldShowTutorial) {
+      Future.delayed(const Duration(milliseconds: 800), () {
+        if (mounted) {
+          _showTutorialDialog();
+        }
+      });
+    }
+  }
+
+  void _showTutorialDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const TutorialDialog(),
+    );
   }
 
   void _initializeAnimations() {

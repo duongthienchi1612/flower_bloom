@@ -4,9 +4,11 @@ import '../constants.dart';
 class UserReference {
   // get
   Future<String?> getLanguage() => getLocal(PreferenceKey.language);
+  Future<bool?> getIsFirstTime() => getLocal(PreferenceKey.isFirstTime);
 
   // set
   Future setLanguage(String value) => setLocal(PreferenceKey.language, value);
+  Future setIsFirstTime(bool value) => setLocal(PreferenceKey.isFirstTime, value);
 
   Future setLocal(String key, dynamic value) async {
     final prefs = await SharedPreferences.getInstance();

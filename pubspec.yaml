@@ -45,6 +45,8 @@ dependencies:
   shared_preferences: ^2.5.2
   audioplayers: ^6.2.0
   equatable: ^2.0.7
+  # Desktop window size control
+  window_manager: ^0.3.8
 
 dev_dependencies:
   flutter_test:

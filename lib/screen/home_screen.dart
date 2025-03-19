@@ -46,17 +46,17 @@ class _HomeScreenState extends BaseState<HomeScreen> with SingleTickerProviderSt
   void _initializeAnimations() {
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 800),
     );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _fadeAnimation = Tween<double>(begin: 1.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
         curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
       ),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
         curve: const Interval(0.0, 0.6, curve: Curves.easeOutBack),
@@ -66,14 +66,14 @@ class _HomeScreenState extends BaseState<HomeScreen> with SingleTickerProviderSt
     _titleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.3, 0.8, curve: Curves.easeOutBack),
+        curve: const Interval(0.0, 0.5, curve: Curves.easeOutBack),
       ),
     );
 
     _buttonAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.5, 1.0, curve: Curves.elasticOut),
+        curve: const Interval(0.2, 0.7, curve: Curves.elasticOut),
       ),
     );
 
@@ -89,6 +89,7 @@ class _HomeScreenState extends BaseState<HomeScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(

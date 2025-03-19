@@ -71,12 +71,21 @@ class _MyAppState extends State<MyApp> {
       supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
         textTheme: AppTextTheme.textTheme,
+        scaffoldBackgroundColor: Colors.transparent,
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          },
+        ),
       ),
       initialRoute: '/',
       onGenerateRoute: (settings) {
         if (settings.name == '/') {
-          return MaterialPageRoute(
-            builder: (context) => const SplashScreen(),
+          return PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => 
+              const SplashScreen(),
+            transitionDuration: Duration.zero,
           );
         } else if (settings.name == ScreenName.home) {
           // Lấy tham số showMenu nếu có
@@ -87,7 +96,7 @@ class _MyAppState extends State<MyApp> {
               changeLanguage: _changeLanguage,
               showMenu: showMenu,
             ),
-            duration: const Duration(milliseconds: 800),
+            duration: const Duration(milliseconds: 600),
           );
         }
         return null;

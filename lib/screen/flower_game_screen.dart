@@ -3,11 +3,9 @@ import 'package:flower_bloom/model/view/game_view_model.dart';
 import 'package:flower_bloom/utilities/audio_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lottie/lottie.dart';
 import '../bloc/game_bloc/game_bloc.dart';
 import '../constants.dart';
-import '../preference/user_reference.dart';
 import '../widget/base/base_widget.dart';
 import '../widget/sound_settings_dialog.dart';
 import '../widget/tutorial_dialog.dart';
@@ -15,9 +13,9 @@ import '../widget/tutorial_dialog.dart';
 class GameScreen extends StatefulWidget {
   final int? level;
   final bool shouldShowTutorial;
-  
+
   const GameScreen({
-    super.key, 
+    super.key,
     this.level,
     this.shouldShowTutorial = false,
   });
@@ -29,7 +27,6 @@ class GameScreen extends StatefulWidget {
 class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMixin {
   final audioManager = injector.get<AudioManager>();
   final bloc = injector.get<GameBloc>();
-  final _userReference = injector.get<UserReference>();
 
   // Controller và animation
   late AnimationController _levelCompleteController;
@@ -53,7 +50,7 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
     super.initState();
     _initializeAnimations();
     audioManager.playSoundEffect(SoundEffect.gameAppear);
-    
+
     // Hiển thị tutorial nếu cần
     if (widget.shouldShowTutorial) {
       Future.delayed(const Duration(milliseconds: 800), () {
@@ -233,7 +230,7 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
           left: 24,
           top: 16,
           child: _buildInfoText(
-            text: '${localizations.moves}: ${model.moveCount}',
+            text: '${appLocalizations.moves}: ${model.moveCount}',
             animation: _moveCountAnimation,
             offset: const Offset(-0.2, 0),
           ),
@@ -244,7 +241,7 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
           right: 24,
           top: 16,
           child: _buildInfoText(
-            text: '${localizations.level}: ${model.level}',
+            text: '${appLocalizations.level}: ${model.level}',
             animation: _levelTextAnimation,
             offset: const Offset(0.2, 0),
           ),
@@ -378,7 +375,7 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
             children: [
               // Title
               Text(
-                localizations.levelComplete,
+                appLocalizations.levelComplete,
                 style: theme.textTheme.headlineMedium!.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -401,7 +398,7 @@ class _GameScreenState extends BaseState<GameScreen> with TickerProviderStateMix
 
               // Move count
               Text(
-                '${localizations.moves}: ${model.moveCount}',
+                '${appLocalizations.moves}: ${model.moveCount}',
                 style: theme.textTheme.titleLarge!.copyWith(color: Colors.white),
               ),
               const SizedBox(height: 22),

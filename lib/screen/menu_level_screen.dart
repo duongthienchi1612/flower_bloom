@@ -33,7 +33,7 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen> with TickerProvid
   late final Animation<double> _screenScaleAnimation;
   late final Animation<double> _screenOpacityAnimation;
   late final Animation<double> _starsCounterAnimation;
-  
+
   final List<Animation<double>> _levelAnimations = [];
   final Set<int> _playedSoundForLevels = {};
 
@@ -48,7 +48,7 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen> with TickerProvid
 
     _gridController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1700),
     );
 
     _gridController.addListener(_handleLevelSoundEffects);
@@ -59,14 +59,14 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen> with TickerProvid
 
     _screenOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
-        parent: _screenController, 
+        parent: _screenController,
         curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
       ),
     );
 
     _starsCounterAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
-        parent: _screenController, 
+        parent: _screenController,
         curve: const Interval(0.6, 1.0, curve: Curves.easeOut),
       ),
     );
@@ -81,7 +81,12 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen> with TickerProvid
     for (int i = 0; i < Constants.totalLevel; i++) {
       if (_levelAnimations[i].value > 0.1 && !_playedSoundForLevels.contains(i)) {
         _playedSoundForLevels.add(i);
-        _audioManager.playSoundEffect(SoundEffect.levelAppear);
+        Future.delayed(const Duration(milliseconds: 50), () {
+          if (mounted) {
+            _audioManager.playSoundEffect(SoundEffect.levelAppear);
+          }
+        });
+
         break;
       }
     }
@@ -89,7 +94,7 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen> with TickerProvid
 
   void _initializeLevelAnimations() {
     for (int i = 0; i < Constants.totalLevel; i++) {
-      final startInterval = 0.1 + (i * 0.1);
+      final startInterval = 0.1 + (i * 0.15);
       final endInterval = startInterval + 0.2;
 
       final animation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -158,7 +163,7 @@ class _MenuLevelScreenState extends BaseState<MenuLevelScreen> with TickerProvid
     final isLocked = !widget.model.unlockedLevels.contains(level);
     final star = widget.model.levelStars.values.elementAt(index);
     final animValue = _levelAnimations[index].value.clamp(0.0, 1.0);
-    
+
     return Transform.scale(
       scale: animValue,
       child: Transform.rotate(

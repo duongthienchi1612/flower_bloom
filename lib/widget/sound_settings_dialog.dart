@@ -4,7 +4,6 @@ import '../constants.dart';
 import '../utilities/audio_manager.dart';
 import '../dependencies.dart';
 import '../widget/base/base_widget.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SoundSettingsDialog extends StatefulWidget {
   final double backgroundVolume;
@@ -66,8 +65,6 @@ class _SoundSettingsDialogState extends BaseState<SoundSettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     return Dialog(
       backgroundColor: Colors.transparent,
       child: SingleChildScrollView(
@@ -87,7 +84,7 @@ class _SoundSettingsDialogState extends BaseState<SoundSettingsDialog> {
               const SizedBox(height: 8),
               // Tiêu đề
               Text(
-                l10n.soundSettings,
+                appLocalizations.soundSettings,
                 style: theme.textTheme.headlineMedium?.copyWith(color: Colors.white),
               ),
               const SizedBox(height: 18),
@@ -96,7 +93,7 @@ class _SoundSettingsDialogState extends BaseState<SoundSettingsDialog> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  l10n.backgroundMusic,
+                  appLocalizations.backgroundMusic,
                   style: theme.textTheme.bodyLarge,
                 ),
               ),
@@ -140,7 +137,7 @@ class _SoundSettingsDialogState extends BaseState<SoundSettingsDialog> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  l10n.soundEffects,
+                  appLocalizations.soundEffects,
                   style: theme.textTheme.bodyLarge,
                 ),
               ),
@@ -190,7 +187,7 @@ class _SoundSettingsDialogState extends BaseState<SoundSettingsDialog> {
                     Transform.translate(
                       offset: const Offset(0, -2),
                       child: Text(
-                        l10n.close,
+                        appLocalizations.close,
                         style: theme.textTheme.bodyLarge?.copyWith(color: AppColors.iconTextColor),
                       ),
                     ),

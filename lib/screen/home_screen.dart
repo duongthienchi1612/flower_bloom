@@ -332,17 +332,17 @@ class _HomeScreenState extends BaseState<HomeScreen> with SingleTickerProviderSt
 
   void _navigateToGame({int? level}) {
     _audioManager.playSoundEffect(SoundEffect.buttonClick);
-    
+
     Navigator.pushReplacement(
       context,
       AppRouteTransitions.fadeScale(
         page: GameScreen(
-          level: level, 
+          level: level,
           shouldShowTutorial: _isFirstTime,
         ),
       ),
     );
-    
+
     if (_isFirstTime) {
       setState(() {
         _isFirstTime = false;

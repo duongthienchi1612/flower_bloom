@@ -5,7 +5,8 @@ import '../preference/user_reference.dart';
 import '../theme/app_colors.dart';
 import '../utilities/audio_manager.dart';
 import '../dependencies.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import 'base/base_widget.dart';
 
 class LanguageSettingsDialog extends StatefulWidget {
   final String currentLanguageCode;
@@ -19,7 +20,7 @@ class LanguageSettingsDialog extends StatefulWidget {
   State<LanguageSettingsDialog> createState() => _LanguageSettingsDialogState();
 }
 
-class _LanguageSettingsDialogState extends State<LanguageSettingsDialog> {
+class _LanguageSettingsDialogState extends BaseState<LanguageSettingsDialog> {
   late String _selectedLanguageCode;
   final audioManager = injector.get<AudioManager>();
   final userReference = UserReference();
@@ -32,8 +33,6 @@ class _LanguageSettingsDialogState extends State<LanguageSettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     return Dialog(
       backgroundColor: Colors.transparent,
       child: SingleChildScrollView(
@@ -53,8 +52,8 @@ class _LanguageSettingsDialogState extends State<LanguageSettingsDialog> {
               const SizedBox(height: 8),
               // Tiêu đề
               Text(
-                l10n.languageSettings,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                appLocalizations.languageSettings,
+                style: theme.textTheme.headlineMedium?.copyWith(color: Colors.white),
               ),
               const SizedBox(height: 18),
 
@@ -62,19 +61,19 @@ class _LanguageSettingsDialogState extends State<LanguageSettingsDialog> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  l10n.selectLanguage,
-                  style: Theme.of(context).textTheme.bodyLarge,
+                  appLocalizations.selectLanguage,
+                  style: theme.textTheme.bodyLarge,
                 ),
               ),
               const SizedBox(height: 12),
 
               // Tiếng Anh
-              _buildLanguageOption('en', l10n.english),
+              _buildLanguageOption('en', appLocalizations.english),
 
               const SizedBox(height: 8),
 
               // Tiếng Việt
-              _buildLanguageOption('vi', l10n.vietnamese),
+              _buildLanguageOption('vi', appLocalizations.vietnamese),
 
               const SizedBox(height: 20),
 
@@ -99,8 +98,8 @@ class _LanguageSettingsDialogState extends State<LanguageSettingsDialog> {
                     Transform.translate(
                       offset: const Offset(0, -2),
                       child: Text(
-                        l10n.apply,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.iconTextColor),
+                        appLocalizations.apply,
+                        style: theme.textTheme.bodyLarge?.copyWith(color: AppColors.iconTextColor),
                       ),
                     ),
                   ],

@@ -10,7 +10,6 @@ import 'preference/user_reference.dart';
 import 'screen/home_screen.dart';
 import 'splash_screen.dart';
 import 'theme/app_text_theme.dart';
-import 'utilities/localization_helper.dart';
 import 'utilities/route_transitions.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -24,7 +23,7 @@ Future<void> main() async {
   // Cài đặt kích thước cửa sổ tối thiểu cho desktop
   if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
     await windowManager.ensureInitialized();
-    
+
     WindowOptions windowOptions = const WindowOptions(
       size: Size(1024, 600),
       minimumSize: Size(800, 480),
@@ -34,7 +33,7 @@ Future<void> main() async {
       titleBarStyle: TitleBarStyle.normal,
       title: 'Flower Bloom',
     );
-    
+
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();
@@ -45,16 +44,6 @@ Future<void> main() async {
   String initialLanguage = await LanguagePreference.getLanguageCode() ?? await UserReference().getLanguage() ?? 'vi';
 
   runApp(MyApp(initialLanguage: initialLanguage));
-  initLocalization();
-}
-
-void initLocalization() {
-  final context = navigatorKey.currentContext;
-  if (context != null) {
-    LocalizationHelper.init(AppLocalizations.of(context)!);
-  } else {
-    Future.delayed(Duration.zero, initLocalization);
-  }
 }
 
 class MyApp extends StatefulWidget {
@@ -105,8 +94,7 @@ class _MyAppState extends State<MyApp> {
       onGenerateRoute: (settings) {
         if (settings.name == '/') {
           return PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => 
-              const SplashScreen(),
+            pageBuilder: (context, animation, secondaryAnimation) => const SplashScreen(),
             transitionDuration: Duration.zero,
           );
         } else if (settings.name == ScreenName.home) {

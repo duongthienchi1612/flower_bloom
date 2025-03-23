@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class TutorialDialog extends StatelessWidget {
+import 'base/base_widget.dart';
+
+class TutorialDialog extends BaseStatelessWidget {
   const TutorialDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     return Dialog(
       backgroundColor: Colors.transparent,
       child: SingleChildScrollView(
@@ -33,7 +32,7 @@ class TutorialDialog extends StatelessWidget {
             children: [
               Center(
                 child: Text(
-                  l10n.tutorialTitle,
+                  appLocalizations(context).tutorialTitle,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -43,20 +42,20 @@ class TutorialDialog extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               _buildTutorialStep(
-                l10n.tutorialStep1Title,
-                l10n.tutorialStep1Desc,
+                appLocalizations(context).tutorialStep1Title,
+                appLocalizations(context).tutorialStep1Desc,
               ),
               _buildTutorialStep(
-                l10n.tutorialStep2Title,
-                l10n.tutorialStep2Desc,
+                appLocalizations(context).tutorialStep2Title,
+                appLocalizations(context).tutorialStep2Desc,
               ),
               _buildTutorialStep(
-                l10n.tutorialStep3Title,
-                l10n.tutorialStep3Desc,
+                appLocalizations(context).tutorialStep3Title,
+                appLocalizations(context).tutorialStep3Desc,
               ),
               _buildTutorialStep(
-                l10n.tutorialStep4Title,
-                l10n.tutorialStep4Desc,
+                appLocalizations(context).tutorialStep4Title,
+                appLocalizations(context).tutorialStep4Desc,
               ),
               const SizedBox(height: 12),
               Center(
@@ -73,7 +72,7 @@ class TutorialDialog extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    l10n.gotIt,
+                    appLocalizations(context).gotIt,
                     style: const TextStyle(
                       fontSize: 14,
                       color: Colors.white,

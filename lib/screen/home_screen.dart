@@ -225,7 +225,7 @@ class _HomeScreenState extends BaseState<HomeScreen> with SingleTickerProviderSt
               onTap: _showTutorial,
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: AppColors.mainTextColor.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(

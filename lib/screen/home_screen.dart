@@ -287,9 +287,21 @@ class _HomeScreenState extends BaseState<HomeScreen> with SingleTickerProviderSt
           onPressed: () => _navigateToGame(),
           highlightColor: Colors.transparent,
           hoverColor: Colors.transparent,
-          icon: Image.asset(
-            ImagePath.icPlayText,
-            width: 100,
+          icon: Stack(
+            alignment: Alignment.center,
+            children: [
+              Image.asset(
+                ImagePath.icBtnTheme,
+                width: 100,
+              ),
+              Transform.translate(
+                offset: const Offset(0, -2),
+                child: Text(
+                  appLocalizations.play,
+                  style: theme.textTheme.headlineSmall?.copyWith(color: AppColors.iconTextColor),
+                ),
+              )
+            ],
           ),
         ),
       ),

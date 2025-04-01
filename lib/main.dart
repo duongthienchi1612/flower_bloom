@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:window_manager/window_manager.dart';
 
 import 'constants.dart';
@@ -15,15 +16,22 @@ import 'utilities/route_transitions.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
-  ]);
+  
+  // Kiểm tra nếu không chạy trên web thì thiết lập định hướng landscape
+  if (!kIsWeb) {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  } else {
+    // Đối với web, thiết lập SystemUI để tối ưu trải nghiệm
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  }
 
   // Cài đặt kích thước cửa sổ tối thiểu cho desktop
-  if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
+  if (!kIsWeb && (Platform.isMacOS || Platform.isWindows || Platform.isLinux)) {
     await windowManager.ensureInitialized();
-
+    
     WindowOptions windowOptions = const WindowOptions(
       size: Size(1024, 600),
       minimumSize: Size(800, 480),
@@ -33,7 +41,7 @@ Future<void> main() async {
       titleBarStyle: TitleBarStyle.normal,
       title: 'Flower Bloom',
     );
-
+    
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();
@@ -41,7 +49,7 @@ Future<void> main() async {
   }
 
   // Lấy ngôn ngữ từ LanguagePreference, nếu không có thì lấy từ UserReference
-  String initialLanguage = await LanguagePreference.getLanguageCode() ?? await UserReference().getLanguage() ?? 'vi';
+  String initialLanguage = await LanguagePreference.getLanguageCode() ?? await UserReference().getLanguage() ?? 'en';
 
   runApp(MyApp(initialLanguage: initialLanguage));
 }
@@ -94,7 +102,8 @@ class _MyAppState extends State<MyApp> {
       onGenerateRoute: (settings) {
         if (settings.name == '/') {
           return PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => const SplashScreen(),
+            pageBuilder: (context, animation, secondaryAnimation) => 
+              const SplashScreen(),
             transitionDuration: Duration.zero,
           );
         } else if (settings.name == ScreenName.home) {

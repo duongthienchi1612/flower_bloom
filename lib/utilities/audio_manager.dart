@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import '../constants.dart';
+import 'dart:async';
 
 class AudioManager {
   final AudioPlayer _backgroundPlayer = AudioPlayer();
@@ -9,24 +11,36 @@ class AudioManager {
   final bool _isSoundOnBackground = true;
   double _backgroundVolume = 0.3;
   double _effectVolume = 1.0;
+  
+  // Kiểm tra nếu đang chạy trên nền tảng web
+  final bool _isWeb = kIsWeb;
 
   AudioManager() {
     _init();
   }
 
-  void _init() {
-    _backgroundPlayer.setAsset(BackgroundMusic.main);
+  Future<void> _init() async {
+    await _backgroundPlayer.setAsset(BackgroundMusic.main);
     _backgroundPlayer.setLoopMode(LoopMode.one);
     _backgroundPlayer.setVolume(_backgroundVolume);
     _effectPlayer.setVolume(_effectVolume);
     _levelAppearPlayer.setVolume(_effectVolume);
 
-    playBackgroundMusic();
+    // Đối với web, chỉ phát nhạc nền sau khi người dùng tương tác
+    if (!_isWeb) {
+      playBackgroundMusic();
+    }
   }
 
-  void playBackgroundMusic() {
+  Future<void> playBackgroundMusic() async {
     if (_isSoundOnBackground) {
-      _backgroundPlayer.play();
+      try {
+        await _backgroundPlayer.play();
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error playing background music: $e');
+        }
+      }
     }
   }
 
@@ -43,8 +57,23 @@ class AudioManager {
       if (assetPath == SoundEffect.levelAppear) {
         _playLevelAppearSound(assetPath);
       } else {
-        _effectPlayer.setAsset(assetPath);
-        _effectPlayer.play();
+        _playRegularSoundEffect(assetPath);
+      }
+
+      // Trên nền tảng web, đảm bảo nhạc nền bắt đầu sau lần tương tác đầu tiên
+      if (_isWeb && !_backgroundPlayer.playing) {
+        playBackgroundMusic();
+      }
+    }
+  }
+
+  void _playRegularSoundEffect(String assetPath) async {
+    try {
+      await _effectPlayer.setAsset(assetPath);
+      _effectPlayer.play();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error playing sound effect: $e');
       }
     }
   }
@@ -54,7 +83,9 @@ class AudioManager {
       await _levelAppearPlayer.setAsset(assetPath);
       _levelAppearPlayer.play();
     } catch (e) {
-      print('Error playing level appear sound: $e');
+      if (kDebugMode) {
+        print('Error playing level appear sound: $e');
+      }
     }
   }
 

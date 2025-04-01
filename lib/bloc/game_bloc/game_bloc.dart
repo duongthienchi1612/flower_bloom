@@ -27,7 +27,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       final levelData = await gameStorage.getLevelData();
 
       String? firstKeyWithZero =
-          levelData.entries.firstWhere((entry) => entry.value == 0, orElse: () => MapEntry("", -1)).key;
+          levelData.entries.firstWhere((entry) => entry.value == 0, orElse: () => const MapEntry("", -1)).key;
       level = int.tryParse(firstKeyWithZero) ?? 1;
     }
 

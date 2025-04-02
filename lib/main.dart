@@ -49,7 +49,25 @@ Future<void> main() async {
   }
 
   // Lấy ngôn ngữ từ LanguagePreference, nếu không có thì lấy từ UserReference
-  String initialLanguage = await LanguagePreference.getLanguageCode() ?? await UserReference().getLanguage() ?? 'en';
+  // Nếu cả hai đều không có, sử dụng ngôn ngữ hệ thống
+  final savedLanguage = await LanguagePreference.getLanguageCode() ?? await UserReference().getLanguage();
+  String initialLanguage;
+  
+  if (savedLanguage != null) {
+    initialLanguage = savedLanguage;
+  } else {
+    // Lấy ngôn ngữ hệ thống
+    final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
+    final systemLanguage = systemLocale.languageCode;
+    
+    // Kiểm tra xem ngôn ngữ hệ thống có được hỗ trợ không
+    final supportedLanguages = ['en', 'vi']; // Thêm các ngôn ngữ được hỗ trợ
+    initialLanguage = supportedLanguages.contains(systemLanguage) ? systemLanguage : 'en';
+    
+    // Lưu ngôn ngữ mặc định vào preferences
+    await LanguagePreference.setLanguageCode(initialLanguage);
+    await UserReference().setLanguage(initialLanguage);
+  }
 
   runApp(MyApp(initialLanguage: initialLanguage));
 }
